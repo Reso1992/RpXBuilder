@@ -1,1 +1,11 @@
+[build]
+  # Verzeichnis, in dem Netlify nach Deinen Functions sucht
+  functions = "netlify/functions"
+  # Ordner, der als Website veröffentlicht wird
+  publish   = "."
 
+# Weiterleitung für Function-URLs (macht die Functions unter /.netlify/functions/* verfügbar)
+[[redirects]]
+  from      = "/.netlify/functions/*"
+  to        = "/.netlify/functions/:splat"
+  status    = 200
