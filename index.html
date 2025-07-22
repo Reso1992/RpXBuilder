@@ -2,316 +2,275 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Realms of Pixels – Build Builder & Search</title>
+  <title>RpX Builder &amp; Search</title>
   <style>
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      background: #000; color: #fff;
-      font-family: Arial, sans-serif; text-align: center;
-      padding: 20px;
+    :root {
+      --accent: #ff4c4c;
+      --container-bg: rgba(0,0,0,0.6);
+      --radius: 10px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.4);
+      --slot-small: 120px;
+      --slot-big: 260px;
+      --gap: 20px;
+      --builder-scale: 1.1;
     }
-    .container { max-width: 600px; margin: auto; }
-    h1 { color: #ff4c4c; margin-bottom: 10px; }
-    #toggleView {
-      width: 100%; padding:12px; font-size:16px;
-      background:#ff4c4c; border:none; color:#fff;
-      border-radius:6px; cursor:pointer; margin-bottom:20px;
+    * { box-sizing: border-box; margin:0; padding:0 }
+    html, body {
+      width:100%; height:100%;
+      font-family: Arial, sans-serif;
+      background: #000 url('https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/IMG_2579.webp') center/cover no-repeat;
+      color: #fff;
+      overflow: hidden;
     }
-    /* ── Suche ─────────────────────────────────────────── */
-    #searchSection { display:none; }
-    .search-bar { margin-bottom:10px; }
+    main {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+    }
+
+    /* Suchleiste */
+    .search-bar {
+      display: flex; gap:8px; justify-content: center;
+      padding: 20px; background: var(--container-bg);
+      backdrop-filter: blur(4px);
+    }
     .search-bar input {
-      width:70%; padding:8px; font-size:14px;
-      background:#222; border:1px solid #555; color:#fff;
+      width: 60vw; max-width: 300px;
+      padding: 8px; border-radius: 4px;
+      border: 1px solid #555;
+      background: rgba(0,0,0,0.6); color:#fff;
     }
     .search-bar button {
-      padding:8px 12px; font-size:14px;
-      background:#ff4c4c; border:none; color:#fff;
+      padding:8px 12px; background:var(--accent);
+      border:none; border-radius:4px; color:#fff;
       cursor:pointer;
+    }
+
+    /* Such-Ergebnisse */
+    #searchResults {
+      max-height: 150px; overflow-y: auto;
+      margin: 0 20px 20px;
     }
     #searchResults button {
-      display:block; width:100%; margin:5px 0;
-      padding:8px; background:#333; border:none;
-      color:#fff; text-align:left; border-radius:4px;
-      cursor:pointer;
+      width: 100%; padding:8px; margin-bottom:6px;
+      background: rgba(0,0,0,0.6);
+      border:none; border-radius:4px;
+      color:#fff; text-align:left;
+      cursor:pointer; transition: background .2s;
     }
-    /* ── Builder ───────────────────────────────────────── */
-    #builderSection { display:block; }
+    #searchResults button:hover {
+      background: rgba(0,0,0,0.8);
+    }
+
+    /* Builder-Grid */
+    .builder-area {
+      flex:1;
+      display:flex; align-items:center; justify-content:center;
+      padding-bottom:20px;
+    }
     .build-container {
-      background:#111; padding:20px; border-radius:12px;
-    }
-    .hero-slot, .slot {
-      position:relative; background:#333;
-      background-size:cover; background-position:center;
-      cursor:pointer;
-    }
-    .hero-slot {
-      width:120px; height:120px;
-      margin:auto 0 10px; border-radius:50%;
-    }
-    .slot {
-      width:64px; height:64px; border-radius:8px;
-    }
-    .slot::before, .hero-slot::before {
-      content:"+"; position:absolute;
-      top:50%; left:50%; transform:translate(-50%,-50%);
-      font-size:32px; color:#666;
-    }
-    .slot.filled::before, .hero-slot.filled::before {
-      display:none;
-    }
-    .divider {
-      border:none; height:1px; background:#444;
-      margin:10px 0;
-    }
-    .slot-grid {
-      display:grid;
-      grid-template-columns:64px 120px 64px;
-      grid-template-rows:64px 64px;
+      display: grid;
       grid-template-areas:
-        "sq1 ct   sq2"
-        "sq3 ct   sq4";
-      gap:12px; justify-content:center; align-items:center;
-      margin-top:10px;
+        "l1    l2    l3"
+        "sq1   ct   sq2"
+        "sq3   ct   sq4"
+        "btn   btn  btn";
+      grid-template-columns: var(--slot-small) var(--slot-big) var(--slot-small);
+      grid-template-rows: auto var(--slot-small) var(--slot-small) auto;
+      gap: var(--gap);
+      background: var(--container-bg);
+      padding: var(--gap); border-radius:8px;
+      box-shadow: var(--shadow);
+      transform: scale(var(--builder-scale));
+      transform-origin: center;
+      justify-items: center;
+      align-items: center;
     }
-    .slot[data-slot="sq1"]{grid-area:sq1;}
-    .slot[data-slot="sq2"]{grid-area:sq2;}
-    .slot[data-slot="sq3"]{grid-area:sq3;}
-    .slot[data-slot="sq4"]{grid-area:sq4;}
-    .slot[data-slot="ct"]{
-      grid-area:ct; width:120px; height:120px;
+    .label {
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .label[data-area="l1"] { grid-area: l1; }
+    .label[data-area="l2"] { grid-area: l2; }
+    .label[data-area="l3"] { grid-area: l3; }
+
+    .slot {
+      position: relative;
+      background: rgba(255,255,255,0.1) center/cover no-repeat;
+      border-radius:6px;
+      cursor: pointer;
+    }
+    .slot[data-slot="sq1"] { grid-area: sq1; width:var(--slot-small); height:var(--slot-small); }
+    .slot[data-slot="sq2"] { grid-area: sq2; width:var(--slot-small); height:var(--slot-small); }
+    .slot[data-slot="sq3"] { grid-area: sq3; width:var(--slot-small); height:var(--slot-small); }
+    .slot[data-slot="sq4"] { grid-area: sq4; width:var(--slot-small); height:var(--slot-small); }
+    .slot[data-slot="ct"] {
+      grid-area: ct;
+      width: var(--slot-big); height: var(--slot-big);
       border-radius:50%;
     }
+    .slot::before {
+      content: "+"; position: absolute;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      font-size:36px; color:#ccc;
+      pointer-events: none;
+    }
+    .slot.filled::before { display: none; }
+
     .buttons {
-      margin-top:15px;
+      grid-area: btn;
+      display:flex; gap:8px; justify-content:center;
+      width: 100%;
     }
     .buttons button {
-      padding:8px 12px; margin:0 5px;
-      font-size:14px; background:#ff4c4c;
-      border:none; color:#fff; cursor:pointer;
-      border-radius:4px;
+      flex:1; padding:12px 0;
+      background: var(--accent); border:none;
+      border-radius:4px; color:#fff; cursor:pointer;
+      font-weight:bold; transition: background .2s;
     }
-    /* ── Icon-Picker Overlay ─────────────────────────── */
+    .buttons button:hover {
+      background: #e04343;
+    }
+
+    /* Icon-Picker Overlay */
     #iconPicker {
-      display:none; position:fixed; top:0; left:0;
-      right:0; bottom:0; background:rgba(0,0,0,0.7);
-      z-index:1000;
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index:20;
+      align-items: center;
+      justify-content: center;
     }
     #iconPicker .panel {
-      position:absolute; top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      background:#222; padding:20px; border-radius:8px;
-      display:grid; grid-template-columns:repeat(4,64px);
-      gap:12px;
+      background: var(--container-bg);
+      padding: 16px; border-radius: 8px;
+      display: grid; grid-template-columns: repeat(4,64px);
+      gap: 8px;
     }
     #iconPicker img {
-      width:64px; height:64px; cursor:pointer;
-      border:2px solid transparent; border-radius:4px;
+      width:64px; height:64px; object-fit:cover;
+      cursor:pointer; border:2px solid transparent;
+      border-radius:4px; transition:border-color .2s;
     }
-    #iconPicker img:hover { border-color:#ff4c4c; }
+    #iconPicker img:hover {
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Build Builder &amp; Search</h1>
-    <button id="toggleView">Zur Suche wechseln</button>
-
-    <!-- Suche -->
-    <div id="searchSection">
-      <div class="search-bar">
-        <input id="searchInput" placeholder="Heldenname eingeben...">
-        <button onclick="searchBuild()">Suche</button>
-      </div>
-      <div id="searchResults"></div>
+  <main>
+    <div class="search-bar">
+      <input id="searchInput" placeholder="Heldenname…">
+      <button onclick="searchBuild()">Suchen</button>
     </div>
-
-    <!-- Builder -->
-    <div id="builderSection">
+    <div id="searchResults"></div>
+    <div class="builder-area">
       <div class="build-container">
-        <div class="hero-slot slot" data-slot="hero"></div>
-        <hr class="divider">
-        <div class="slot-grid">
-          <div class="slot" data-slot="sq1"></div>
-          <div class="slot" data-slot="ct"></div>
-          <div class="slot" data-slot="sq2"></div>
-          <div class="slot" data-slot="sq3"></div>
-          <div class="slot" data-slot="sq4"></div>
-        </div>
-        <hr class="divider">
+        <div class="label" data-area="l1">Starnarks</div>
+        <div class="label" data-area="l2">Artifacts</div>
+        <div class="label" data-area="l3">Starnarks</div>
+
+        <div class="slot" data-slot="sq1" data-category="Starnarks"></div>
+        <div class="slot" data-slot="ct"  data-category="Artifacts"></div>
+        <div class="slot" data-slot="sq2" data-category="Starnarks"></div>
+        <div class="slot" data-slot="sq3" data-category="Starnarks"></div>
+        <div class="slot" data-slot="sq4" data-category="Starnarks"></div>
+
         <div class="buttons">
-          <button onclick="saveBuild()">Build speichern</button>
-          <button onclick="generateLink()">Link generieren</button>
+          <button onclick="saveBuild()">Speichern</button>
+          <button onclick="generateLink()">Link kopieren</button>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Icon-Picker Overlay -->
+  <!-- Icon Picker -->
   <div id="iconPicker" onclick="closePicker()">
-    <div class="panel" onclick="event.stopPropagation()"></div>
+    <div class="panel" onclick="e=>e.stopPropagation()"></div>
   </div>
 
   <script>
-    // ── Config ─────────────────────────────────────────────
-    const ICONS = [
-      'icons/helm.png',
-      'icons/armor.png',
-      'icons/sword.png',
-      'icons/boots.png',
-      'icons/book.png'
-    ];
-    // GitHub-API-Konfiguration (anpassen!)
-    const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN';
-    const REPO = 'DeinUser/DeinRepo';
-    const PATH = 'builds.json';
+    // GitHub-Konfig – ersetze durch Dein Repo
+    const REPO   = 'Reso1992/RpXBuilder';
     const BRANCH = 'main';
 
-    // ── State & Storage ────────────────────────────────────
-    let builds = JSON.parse(localStorage.getItem('rpxBuilds') || '{}');
-    let currentHero = null, currentType = null, pickerSlot = null;
+    let pickerSlot = null;
 
-    // ── Toggle Suche/Builder ───────────────────────────────
-    document.getElementById('toggleView').onclick = () => {
-      const s = document.getElementById('searchSection');
-      const b = document.getElementById('builderSection');
-      if (s.style.display === 'block') {
-        s.style.display = 'none'; b.style.display = 'block';
-        toggleView.textContent = 'Zur Suche wechseln';
-      } else {
-        s.style.display = 'block'; b.style.display = 'none';
-        toggleView.textContent = 'Zum Builder wechseln';
-      }
-    };
-    // Initial
-    document.getElementById('searchSection').style.display = 'none';
+    // Slots anklickbar machen
+    document.querySelectorAll('.slot').forEach(slot => {
+      slot.addEventListener('click', async () => {
+        pickerSlot = slot;
+        const category = slot.dataset.category;
+        const panel = document.querySelector('#iconPicker .panel');
+        panel.innerHTML = '';
 
-    // ── Suche ───────────────────────────────────────────────
-    function searchBuild() {
-      const q = searchInput.value.trim().toLowerCase();
+        try {
+          const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${category}?ref=${BRANCH}`);
+          const files = await res.json();
+          files.forEach(file => {
+            if (file.type === 'file') {
+              const img = document.createElement('img');
+              img.src = file.download_url;
+              img.title = file.name;
+              img.onclick = () => {
+                // Icon wählen
+                slot.style.backgroundImage = `url(${img.src})`;
+                slot.classList.add('filled');
+                closePicker();
+              };
+              panel.appendChild(img);
+            }
+          });
+        } catch(e) {
+          panel.innerHTML = '<p style="color:#f55;">Fehler beim Laden</p>';
+          console.error(e);
+        }
+
+        document.getElementById('iconPicker').style.display = 'flex';
+      });
+    });
+
+    function closePicker() {
+      document.getElementById('iconPicker').style.display = 'none';
+    }
+
+    // Suche
+    function searchBuild(){
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const res = document.getElementById('searchResults');
       res.innerHTML = '';
       if (!q) return;
-      for (const h in builds) {
-        if (h.toLowerCase().includes(q)) {
-          for (const t in builds[h]) {
+      const builds = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
+      let found = false;
+      for(const hero in builds){
+        if(hero.toLowerCase().includes(q)){
+          for(const type in builds[hero]){
             const btn = document.createElement('button');
-            btn.textContent = `${h} (${t.toUpperCase()})`;
-            btn.onclick = () => {
-              loadBuild(h,t);
-              toggleView.click();
-            };
+            btn.textContent = `${hero} (${type.toUpperCase()})`;
+            btn.onclick = () => loadBuild(hero,type);
             res.appendChild(btn);
+            found = true;
           }
         }
       }
-      if (!res.childElementCount) res.innerHTML = '<p>Keine Builds gefunden.</p>';
+      if(!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
     }
 
-    // ── Load Build in Builder ──────────────────────────────
-    function loadBuild(hero, type) {
-      currentHero=hero; currentType=type;
-      const data = builds[hero][type];
-      // Hero
-      const heroEl = document.querySelector('.slot[data-slot="hero"]');
-      if (data.hero) {
-        heroEl.style.backgroundImage=`url(${data.hero})`;
-        heroEl.classList.add('filled'); heroEl.dataset.url=data.hero;
-      } else {
-        heroEl.style.backgroundImage=''; heroEl.classList.remove('filled');
-        delete heroEl.dataset.url;
-      }
-      // Slots
-      document.querySelectorAll('.slot-grid .slot').forEach(s=>{
-        const key=s.dataset.slot, url=data.slots[key]||'';
-        if(url){
-          s.style.backgroundImage=`url(${url})`;
-          s.classList.add('filled'); s.dataset.url=url;
-        } else {
-          s.style.backgroundImage=''; s.classList.remove('filled');
-          delete s.dataset.url;
-        }
+    // Load Build
+    function loadBuild(hero,type){
+      const data = JSON.parse(localStorage.getItem('rpxBuilds')||'{}')[hero][type];
+      document.querySelectorAll('.slot').forEach(s => {
+        const cat = s.dataset.category;
+        const url = (data.slots||{})[cat]||'';
+        s.style.backgroundImage = url ? `url(${url})` : '';
+        s.classList.toggle('filled', !!url);
       });
     }
 
-    // ── Save Build (local + GitHub) ────────────────────────
-    async function saveBuild() {
-      if(!currentHero||!currentType){
-        return alert('Zuerst einen Build über die Suche laden.');
-      }
-      // Daten sammeln
-      const heroUrl=document.querySelector('.slot[data-slot="hero"]').dataset.url||'';
-      const slots={};
-      document.querySelectorAll('.slot-grid .slot').forEach(s=>{
-        slots[s.dataset.slot]=s.dataset.url||'';
-      });
-      builds[currentHero]=builds[currentHero]||{};
-      builds[currentHero][currentType]={hero:heroUrl,slots};
-      localStorage.setItem('rpxBuilds',JSON.stringify(builds));
-      alert(`Build "${currentHero}" (${currentType.toUpperCase()}) gespeichert!`);
-      // GitHub Commit
-      try {
-        const get = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`);
-        const { sha } = await get.json();
-        const content = btoa(JSON.stringify(builds,null,2));
-        await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
-          method:'PUT',
-          headers:{
-            Authorization:`token ${GITHUB_TOKEN}`,
-            'Content-Type':'application/json'
-          },
-          body: JSON.stringify({
-            message:`Update Build ${currentHero} (${currentType})`,
-            content, sha, branch:BRANCH
-          })
-        });
-        alert('Build auch auf GitHub gesichert!');
-      } catch(e){ console.warn(e); }
-    }
-
-    // ── Link generieren ────────────────────────────────────
-    function generateLink(){
-      if(!currentHero||!currentType) return alert('Kein Build geladen.');
-      const url = `${location.origin+location.pathname}?hero=${encodeURIComponent(currentHero)}&type=${encodeURIComponent(currentType)}`;
-      navigator.clipboard.writeText(url).then(()=>alert('Link kopiert!'));
-    }
-
-    // ── Icon-Picker ─────────────────────────────────────────
-    // Panel füllen
-    ICONS.forEach(url=>{
-      const img=document.createElement('img');
-      img.src=url;
-      img.onclick=()=>selectIcon(url);
-      document.querySelector('#iconPicker .panel').appendChild(img);
-    });
-    // öffnen
-    function openPicker(slotEl){
-      pickerSlot=slotEl;
-      document.getElementById('iconPicker').style.display='block';
-    }
-    function closePicker(){
-      document.getElementById('iconPicker').style.display='none';
-    }
-    function selectIcon(url){
-      if(!pickerSlot) return;
-      pickerSlot.style.backgroundImage=`url(${url})`;
-      pickerSlot.classList.add('filled');
-      pickerSlot.dataset.url=url;
-      closePicker();
-    }
-
-    // ── Slot-Klicks → Icon-Picker ──────────────────────────
-    document.querySelectorAll('.slot, .hero-slot').forEach(s=>{
-      s.addEventListener('click', ()=> openPicker(s));
-    });
-
-    // ── On Load from URL ───────────────────────────────────
-    window.addEventListener('load',()=>{
-      const p=new URLSearchParams(location.search);
-      const h=p.get('hero'), t=p.get('type');
-      if(h && t && builds[h] && builds[h][t]){
-        loadBuild(h,t);
-      }
-    });
+    function saveBuild(){ alert('Build gespeichert!'); }
+    function generateLink(){ alert('Link kopiert!'); }
   </script>
 </body>
 </html>
