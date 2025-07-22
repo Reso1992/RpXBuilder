@@ -14,169 +14,185 @@
       --gap: 20px;
       --builder-scale: 1.1;
     }
-    * { box-sizing: border-box; margin:0; padding:0 }
+    * { box-sizing:border-box; margin:0; padding:0 }
     html, body {
       width:100%; height:100%;
       font-family: Arial, sans-serif;
       background: #000 url('https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/IMG_2579.webp') center/cover no-repeat;
-      color: #fff;
-      overflow: hidden;
+      color: #fff; overflow: hidden;
     }
     main {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
     }
 
     /* Suchleiste */
     .search-bar {
-      display: flex; gap:8px; justify-content: center;
-      padding: 20px; background: var(--container-bg);
-      backdrop-filter: blur(4px);
+      width:80%; max-width:800px;
+      margin:20px auto;
+      display:flex; gap:12px; justify-content:center;
+      padding:16px; background:var(--container-bg);
+      backdrop-filter: blur(4px); border-radius:var(--radius);
     }
     .search-bar input {
-      width: 60vw; max-width: 300px;
-      padding: 8px; border-radius: 4px;
-      border: 1px solid #555;
+      flex:2; padding:12px; font-size:16px;
+      border-radius:4px; border:1px solid #555;
       background: rgba(0,0,0,0.6); color:#fff;
     }
     .search-bar button {
-      padding:8px 12px; background:var(--accent);
-      border:none; border-radius:4px; color:#fff;
-      cursor:pointer;
+      flex:1; padding:12px 20px; font-size:16px;
+      background:var(--accent); border:none;
+      border-radius:4px; color:#fff;
+      cursor:pointer; transition:background .2s;
     }
+    .search-bar button:hover { background:#e04343 }
 
     /* Such-Ergebnisse */
     #searchResults {
-      max-height: 150px; overflow-y: auto;
-      margin: 0 20px 20px;
+      max-height:150px; overflow-y:auto;
+      margin:0 auto 20px; width:80%; max-width:800px;
     }
     #searchResults button {
-      width: 100%; padding:8px; margin-bottom:6px;
-      background: rgba(0,0,0,0.6);
-      border:none; border-radius:4px;
-      color:#fff; text-align:left;
-      cursor:pointer; transition: background .2s;
+      width:100%; padding:8px; margin-bottom:6px;
+      background:rgba(0,0,0,0.6); border:none;
+      border-radius:4px; color:#fff;
+      text-align:left; cursor:pointer;
+      transition:background .2s;
     }
-    #searchResults button:hover {
-      background: rgba(0,0,0,0.8);
-    }
+    #searchResults button:hover { background:rgba(0,0,0,0.8) }
 
     /* Builder-Grid */
     .builder-area {
-      flex:1;
-      display:flex; align-items:center; justify-content:center;
+      flex:1; display:flex;
+      align-items:center; justify-content:center;
       padding-bottom:20px;
     }
     .build-container {
       display: grid;
+      grid-template-columns:
+        var(--slot-small)
+        var(--slot-small)
+        var(--slot-big)
+        var(--slot-small);
+      grid-template-rows:
+        auto
+        var(--slot-small)
+        var(--slot-small)
+        auto;
       grid-template-areas:
-        "l1    l2    l3"
-        "sq1   ct   sq2"
-        "sq3   ct   sq4"
-        "btn   btn  btn";
-      grid-template-columns: var(--slot-small) var(--slot-big) var(--slot-small);
-      grid-template-rows: auto var(--slot-small) var(--slot-small) auto;
+        "l1    l1    l2    l3"
+        "st1   st2   ct    mb1"
+        "st3   st4   ct    mb2"
+        "btn   btn   btn   btn";
       gap: var(--gap);
       background: var(--container-bg);
       padding: var(--gap); border-radius:8px;
       box-shadow: var(--shadow);
       transform: scale(var(--builder-scale));
       transform-origin: center;
-      justify-items: center;
-      align-items: center;
+      justify-items: center; align-items: center;
     }
+
+    /* Labels */
     .label {
-      text-align: center;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: var(--accent);
+      text-align:center; font-weight:bold;
+      text-transform:uppercase; color:var(--accent);
     }
     .label[data-area="l1"] { grid-area: l1; }
     .label[data-area="l2"] { grid-area: l2; }
     .label[data-area="l3"] { grid-area: l3; }
 
+    /* Slots */
     .slot {
-      position: relative;
+      position:relative;
       background: rgba(255,255,255,0.1) center/cover no-repeat;
-      border-radius:6px;
-      cursor: pointer;
+      cursor:pointer; transition: box-shadow .2s;
     }
-    .slot[data-slot="sq1"] { grid-area: sq1; width:var(--slot-small); height:var(--slot-small); }
-    .slot[data-slot="sq2"] { grid-area: sq2; width:var(--slot-small); height:var(--slot-small); }
-    .slot[data-slot="sq3"] { grid-area: sq3; width:var(--slot-small); height:var(--slot-small); }
-    .slot[data-slot="sq4"] { grid-area: sq4; width:var(--slot-small); height:var(--slot-small); }
-    .slot[data-slot="ct"] {
-      grid-area: ct;
-      width: var(--slot-big); height: var(--slot-big);
-      border-radius:50%;
-    }
+    .slot[data-slot="sq1"] { grid-area: st1; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
+    .slot[data-slot="sq3"] { grid-area: st2; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
+    .slot[data-slot="sq5"] { grid-area: st3; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
+    .slot[data-slot="sq6"] { grid-area: st4; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
+    .slot[data-slot="ct"]  { grid-area: ct;  width:var(--slot-big); height:var(--slot-big); border-radius:50%; }
+    .slot[data-slot="sq2"] { grid-area: mb1; width:var(--slot-small); height:var(--slot-small); border-radius:50%; }
+    .slot[data-slot="sq4"] { grid-area: mb2; width:var(--slot-small); height:var(--slot-small); border-radius:50%; }
     .slot::before {
-      content: "+"; position: absolute;
-      top:50%; left:50%;
-      transform: translate(-50%,-50%);
-      font-size:36px; color:#ccc;
-      pointer-events: none;
+      content:"+"; position:absolute;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      font-size:36px; color:#ccc; pointer-events:none;
     }
-    .slot.filled::before { display: none; }
+    .slot.filled::before { display:none; }
 
+    /* Neon-Rahmen */
+    .slot[data-category="Starmarks"] {
+      box-shadow: 0 0 8px gold, 0 0 16px gold;
+      border:2px solid gold;
+    }
+    .slot[data-category="Artifacts"] {
+      box-shadow: 0 0 8px red, 0 0 16px red;
+      border:2px solid red;
+    }
+    .slot[data-category="MoonBadges"] {
+      box-shadow: 0 0 8px silver, 0 0 16px silver;
+      border:2px solid silver;
+    }
+
+    /* Buttons */
     .buttons {
       grid-area: btn;
       display:flex; gap:8px; justify-content:center;
-      width: 100%;
+      width:100%;
     }
     .buttons button {
       flex:1; padding:12px 0;
-      background: var(--accent); border:none;
+      background:var(--accent); border:none;
       border-radius:4px; color:#fff; cursor:pointer;
-      font-weight:bold; transition: background .2s;
+      font-weight:bold; transition:background .2s;
     }
-    .buttons button:hover {
-      background: #e04343;
-    }
+    .buttons button:hover { background:#e04343 }
 
-    /* Icon-Picker Overlay */
+    /* Icon-Picker */
     #iconPicker {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index:20;
-      align-items: center;
-      justify-content: center;
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.5); z-index:20;
+      align-items:center; justify-content:center;
     }
     #iconPicker .panel {
-      background: var(--container-bg);
-      padding: 16px; border-radius: 8px;
-      display: grid; grid-template-columns: repeat(4,64px);
-      gap: 8px;
+      background:var(--container-bg);
+      padding:16px; border-radius:8px;
+      display:grid; grid-template-columns:repeat(4,64px);
+      gap:8px;
     }
     #iconPicker img {
       width:64px; height:64px; object-fit:cover;
       cursor:pointer; border:2px solid transparent;
       border-radius:4px; transition:border-color .2s;
     }
-    #iconPicker img:hover {
-      border-color: var(--accent);
-    }
+    #iconPicker img:hover { border-color:var(--accent) }
   </style>
 </head>
 <body>
   <main>
+    <!-- Suchleiste -->
     <div class="search-bar">
-      <input id="searchInput" placeholder="Heldenname…">
+      <input id="searchInput" placeholder="Build-Namen…">
       <button onclick="searchBuild()">Suchen</button>
     </div>
+    <!-- Ergebnisse -->
     <div id="searchResults"></div>
+    <!-- Builder -->
     <div class="builder-area">
       <div class="build-container">
-        <div class="label" data-area="l1">Starnarks</div>
+        <div class="label" data-area="l1">Starmarks</div>
         <div class="label" data-area="l2">Artifacts</div>
-        <div class="label" data-area="l3">Starnarks</div>
+        <div class="label" data-area="l3">MoonBadges</div>
 
-        <div class="slot" data-slot="sq1" data-category="Starnarks"></div>
+        <div class="slot" data-slot="sq1" data-category="Starmarks"></div>
+        <div class="slot" data-slot="sq2" data-category="MoonBadges"></div>
+        <div class="slot" data-slot="sq3" data-category="Starmarks"></div>
         <div class="slot" data-slot="ct"  data-category="Artifacts"></div>
-        <div class="slot" data-slot="sq2" data-category="Starnarks"></div>
-        <div class="slot" data-slot="sq3" data-category="Starnarks"></div>
-        <div class="slot" data-slot="sq4" data-category="Starnarks"></div>
+        <div class="slot" data-slot="sq4" data-category="MoonBadges"></div>
+        <div class="slot" data-slot="sq5" data-category="Starmarks"></div>
+        <div class="slot" data-slot="sq6" data-category="Starmarks"></div>
 
         <div class="buttons">
           <button onclick="saveBuild()">Speichern</button>
@@ -186,91 +202,151 @@
     </div>
   </main>
 
-  <!-- Icon Picker -->
+  <!-- Icon Picker Overlay -->
   <div id="iconPicker" onclick="closePicker()">
     <div class="panel" onclick="e=>e.stopPropagation()"></div>
   </div>
 
   <script>
-    // GitHub-Konfig – ersetze durch Dein Repo
     const REPO   = 'Reso1992/RpXBuilder';
     const BRANCH = 'main';
-
     let pickerSlot = null;
 
-    // Slots anklickbar machen
-    document.querySelectorAll('.slot').forEach(slot => {
-      slot.addEventListener('click', async () => {
-        pickerSlot = slot;
-        const category = slot.dataset.category;
-        const panel = document.querySelector('#iconPicker .panel');
-        panel.innerHTML = '';
+    const categoryFolderMap = {
+      Starmarks:  'Starmarks',
+      Artifacts:  'Artifacts',
+      MoonBadges: 'Moonbadges'
+    };
 
+    // Icon‐Picker
+    document.querySelectorAll('.slot').forEach(slot=>{
+      slot.addEventListener('click', async ()=>{
+        pickerSlot = slot;
+        const folder = categoryFolderMap[slot.dataset.category];
+        const panel  = document.querySelector('#iconPicker .panel');
+        panel.innerHTML = '';
         try {
-          const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${category}?ref=${BRANCH}`);
+          const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
+          if (!res.ok) throw new Error(`Folder not found: ${folder}`);
           const files = await res.json();
-          files.forEach(file => {
-            if (file.type === 'file') {
+          files.forEach(f=>{
+            if (f.type==='file') {
               const img = document.createElement('img');
-              img.src = file.download_url;
-              img.title = file.name;
-              img.onclick = () => {
-                // Icon wählen
-                slot.style.backgroundImage = `url(${img.src})`;
-                slot.classList.add('filled');
+              img.src = f.download_url;
+              img.title = f.name;
+              img.onclick = ()=>{
+                pickerSlot.style.backgroundImage = `url(${img.src})`;
+                pickerSlot.classList.add('filled');
+                pickerSlot.dataset.url = img.src;
                 closePicker();
               };
               panel.appendChild(img);
             }
           });
-        } catch(e) {
-          panel.innerHTML = '<p style="color:#f55;">Fehler beim Laden</p>';
-          console.error(e);
+        } catch(e){
+          panel.innerHTML = `<p style="color:#f55;">Fehler beim Laden von "${folder}"</p>`;
         }
-
         document.getElementById('iconPicker').style.display = 'flex';
       });
     });
 
-    function closePicker() {
+    function closePicker(){
       document.getElementById('iconPicker').style.display = 'none';
     }
 
-    // Suche
-    function searchBuild(){
+    // Speichern + Netlify-Function
+    async function saveBuild(){
+      const name = prompt('Name für Deinen Build:');
+      if(!name) return;
+
+      // Slots einsammeln
+      const slots = {};
+      document.querySelectorAll('.slot').forEach(s=>{
+        slots[s.dataset.slot] = s.dataset.url||'';
+      });
+
+      // 1) lokal speichern
+      const local = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
+      local[name] = { slots };
+      localStorage.setItem('rpxBuilds', JSON.stringify(local));
+
+      // 2) GitHub via Netlify-Function
+      try {
+        const res = await fetch('/.netlify/functions/saveBuilds', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ name, slots })
+        });
+        if(!res.ok) throw new Error(await res.text());
+        alert(`Build "${name}" gespeichert (lokal & GitHub).`);
+      } catch(err) {
+        console.error(err);
+        alert('Fehler beim Speichern in GitHub.');
+      }
+    }
+
+    // Laden aus localStorage
+    function loadBuild(name){
+      const all = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
+      const data = all[name]?.slots;
+      if(!data) return alert(`Build "${name}" nicht gefunden.`);
+      document.querySelectorAll('.slot').forEach(s=>{
+        const url = data[s.dataset.slot]||'';
+        s.style.backgroundImage = url ? `url(${url})` : '';
+        s.classList.toggle('filled', !!url);
+        if(url) s.dataset.url=url; else delete s.dataset.url;
+      });
+    }
+
+    // Suche in builds.json im Repo
+    async function searchBuild(){
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const res = document.getElementById('searchResults');
       res.innerHTML = '';
-      if (!q) return;
-      const builds = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
-      let found = false;
-      for(const hero in builds){
-        if(hero.toLowerCase().includes(q)){
-          for(const type in builds[hero]){
+      if(!q) return;
+      try {
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
+        if(!r.ok) throw new Error('builds.json nicht verfügbar');
+        const builds = await r.json();
+        let found=false;
+        for(const name in builds){
+          if(name.toLowerCase().includes(q)){
             const btn = document.createElement('button');
-            btn.textContent = `${hero} (${type.toUpperCase()})`;
-            btn.onclick = () => loadBuild(hero,type);
+            btn.textContent = name;
+            btn.onclick = ()=> loadBuild(name);
             res.appendChild(btn);
             found = true;
           }
         }
+        if(!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
+      } catch(e){
+        console.error(e);
+        res.innerHTML = '<p style="color:#f55;">Fehler beim Laden der Builds.</p>';
       }
-      if(!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
     }
 
-    // Load Build
-    function loadBuild(hero,type){
-      const data = JSON.parse(localStorage.getItem('rpxBuilds')||'{}')[hero][type];
-      document.querySelectorAll('.slot').forEach(s => {
-        const cat = s.dataset.category;
-        const url = (data.slots||{})[cat]||'';
-        s.style.backgroundImage = url ? `url(${url})` : '';
-        s.classList.toggle('filled', !!url);
+    // Link generieren
+    function generateLink(){
+      const params = new URLSearchParams();
+      document.querySelectorAll('.slot').forEach(s=>{
+        if(s.dataset.url) params.set(s.dataset.slot, s.dataset.url);
       });
+      navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`)
+        .then(()=>alert('Link kopiert!'));
     }
 
-    function saveBuild(){ alert('Build gespeichert!'); }
-    function generateLink(){ alert('Link kopiert!'); }
+    // URL‐Parameter beim Laden auslesen
+    window.addEventListener('load', ()=>{
+      const p = new URLSearchParams(location.search);
+      document.querySelectorAll('.slot').forEach(s=>{
+        const url = p.get(s.dataset.slot);
+        if(url){
+          s.style.backgroundImage = `url(${url})`;
+          s.classList.add('filled');
+          s.dataset.url = url;
+        }
+      });
+    });
   </script>
 </body>
 </html>
