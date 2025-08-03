@@ -1,126 +1,197 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>RpX Builder &amp; Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
       --accent: #ff4c4c;
-      --container-bg: rgba(0,0,0,0.6);
       --radius: 10px;
-      --shadow: 0 4px 12px rgba(0,0,0,0.4);
-      --slot-small: 120px;
-      --slot-big: 260px;
-      --gap: 20px;
-      --builder-scale: 1.1;
+      --shadow: 0 6px 20px rgba(0,0,0,0.5);
+      --bg-layer: rgba(0,0,0,0.5);
+      --transition: .25s ease;
+      --slot-small: 100px;
+      --slot-big: 200px;
+      --gap: 16px;
     }
-    * { box-sizing:border-box; margin:0; padding:0 }
-    html, body {
-      width:100%; height:100%;
-      font-family: Arial, sans-serif;
-      background: #000 url('https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/IMG_2579.webp') center/cover no-repeat;
-      color: #fff; overflow: hidden;
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+      background: #000 url('https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/IMG_2579.webp') center/cover no-repeat fixed;
+      min-height:100vh;
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
     }
     main {
-      position:absolute; inset:0;
-      display:flex; flex-direction:column;
+      position:relative;
+      z-index:1;
+      padding: 20px 12px 60px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      max-width:1250px;
+      margin:0 auto;
     }
 
     /* Suchleiste */
     .search-bar {
-      width:80%; max-width:800px;
-      margin:20px auto;
-      display:flex; gap:12px; justify-content:center;
-      padding:16px; background:var(--container-bg);
-      backdrop-filter: blur(4px); border-radius:var(--radius);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      width:100%;
+      max-width:1000px;
+      margin:0 auto;
+      background: var(--bg-layer);
+      padding:12px 14px;
+      border-radius:8px;
+      backdrop-filter: blur(6px);
+      position:relative;
     }
     .search-bar input {
-      flex:2; padding:12px; font-size:16px;
-      border-radius:4px; border:1px solid #555;
-      background: rgba(0,0,0,0.6); color:#fff;
+      flex:2;
+      min-width:150px;
+      padding:12px 14px;
+      border-radius:6px;
+      border:1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.5);
+      color:#fff;
+      font-size:1rem;
+      outline:none;
+      transition:box-shadow var(--transition);
     }
+    .search-bar input:focus { box-shadow: 0 0 12px rgba(255,76,76,.7); }
     .search-bar button {
-      flex:1; padding:12px 20px; font-size:16px;
-      background:var(--accent); border:none;
-      border-radius:4px; color:#fff;
-      cursor:pointer; transition:background .2s;
+      flex:0 0 140px;
+      padding:12px;
+      background: var(--accent);
+      border:none;
+      border-radius:6px;
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      position:relative;
+      overflow:hidden;
+      transition:filter .2s;
     }
-    .search-bar button:hover { background:#e04343 }
+    .search-bar button:active { animation: pulse .4s; }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(.95); }
+      100% { transform: scale(1); }
+    }
 
-    /* Such-Ergebnisse */
     #searchResults {
-      max-height:150px; overflow-y:auto;
-      margin:0 auto 20px; width:80%; max-width:800px;
+      max-height:220px;
+      overflow-y:auto;
+      width:100%;
+      max-width:1000px;
+      margin:0 auto;
     }
     #searchResults button {
-      width:100%; padding:8px; margin-bottom:6px;
-      background:rgba(0,0,0,0.6); border:none;
-      border-radius:4px; color:#fff;
-      text-align:left; cursor:pointer;
-      transition:background .2s;
+      width:100%;
+      padding:10px 14px;
+      margin-bottom:6px;
+      background: rgba(0,0,0,0.6);
+      border:none;
+      border-radius:6px;
+      text-align:left;
+      color:#fff;
+      cursor:pointer;
+      transition:background .2s, transform .15s;
+      position:relative;
     }
-    #searchResults button:hover { background:rgba(0,0,0,0.8) }
+    #searchResults button:active { transform: scale(.97); }
+    #searchResults button:hover { background: rgba(0,0,0,0.8); }
 
-    /* Builder-Grid */
+    /* Builder */
     .builder-area {
-      flex:1; display:flex;
-      align-items:center; justify-content:center;
-      padding-bottom:20px;
+      flex:1;
+      display:flex;
+      justify-content:center;
+      padding:0 6px;
     }
     .build-container {
-      display: grid;
-      grid-template-columns:
-        var(--slot-small)
-        var(--slot-small)
-        var(--slot-big)
-        var(--slot-small);
+      display:grid;
+      gap: var(--gap);
+      background: rgba(0,0,0,0.5);
+      padding:24px;
+      border-radius:14px;
+      box-shadow: var(--shadow);
+      width:100%;
+      max-width:1100px;
+      grid-template-columns: 120px repeat(3, 1fr) 120px;
       grid-template-rows:
         auto
-        var(--slot-small)
-        var(--slot-small)
+        repeat(2, auto)
         auto;
       grid-template-areas:
-        "l1    l1    l2    l3"
-        "st1   st2   ct    mb1"
-        "st3   st4   ct    mb2"
-        "btn   btn   btn   btn";
-      gap: var(--gap);
-      background: var(--container-bg);
-      padding: var(--gap); border-radius:8px;
-      box-shadow: var(--shadow);
-      transform: scale(var(--builder-scale));
-      transform-origin: center;
-      justify-items: center; align-items: center;
+        "hero l1 l2 l3 ."
+        "st1 st2 ct mb1 ."
+        "st3 st4 ct mb2 ."
+        "btn btn btn btn btn";
+      position:relative;
     }
 
     /* Labels */
     .label {
-      text-align:center; font-weight:bold;
-      text-transform:uppercase; color:var(--accent);
+      text-transform: uppercase;
+      font-weight:700;
+      font-size:.9rem;
+      letter-spacing:1px;
+      color: #ff4c4c;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:6px;
     }
     .label[data-area="l1"] { grid-area: l1; }
     .label[data-area="l2"] { grid-area: l2; }
     .label[data-area="l3"] { grid-area: l3; }
 
+    /* Slot-Gruppen Visual (Starmarks oben/untereinander) */
+    .starmark-pair {
+      display:grid;
+      grid-template-columns: repeat(2, var(--slot-small));
+      gap:8px;
+    }
+    .starmark-wrapper {
+      grid-area: st1;
+    }
+
     /* Slots */
     .slot {
       position:relative;
-      background: rgba(255,255,255,0.1) center/cover no-repeat;
-      cursor:pointer; transition: box-shadow .2s;
+      background: rgba(255,255,255,0.04) center/cover no-repeat;
+      cursor:pointer;
+      border-radius:8px;
+      transition: box-shadow var(--transition), transform .15s;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
     }
-    .slot[data-slot="sq1"] { grid-area: st1; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
-    .slot[data-slot="sq3"] { grid-area: st2; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
-    .slot[data-slot="sq5"] { grid-area: st3; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
-    .slot[data-slot="sq6"] { grid-area: st4; width:var(--slot-small); height:var(--slot-small); border-radius:8px; }
-    .slot[data-slot="ct"]  { grid-area: ct;  width:var(--slot-big); height:var(--slot-big); border-radius:50%; }
-    .slot[data-slot="sq2"] { grid-area: mb1; width:var(--slot-small); height:var(--slot-small); border-radius:50%; }
-    .slot[data-slot="sq4"] { grid-area: mb2; width:var(--slot-small); height:var(--slot-small); border-radius:50%; }
-    .slot::before {
-      content:"+"; position:absolute;
-      top:50%; left:50%; transform:translate(-50%,-50%);
-      font-size:36px; color:#ccc; pointer-events:none;
+    .slot .plus {
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      font-size:32px;
+      color: rgba(255,255,255,0.7);
+      pointer-events:none;
     }
-    .slot.filled::before { display:none; }
+    .slot.filled .plus { display:none; }
+
+    .slot[data-slot="sq1"] { grid-area: st1; width: var(--slot-small); height: var(--slot-small); }
+    .slot[data-slot="sq3"] { grid-area: st2; width: var(--slot-small); height: var(--slot-small); }
+    .slot[data-slot="sq5"] { grid-area: st3; width: var(--slot-small); height: var(--slot-small); }
+    .slot[data-slot="sq6"] { grid-area: st4; width: var(--slot-small); height: var(--slot-small); }
+    .slot[data-slot="ct"]  { grid-area: ct; width: var(--slot-big); height: var(--slot-big); border-radius:50%; }
+    .slot[data-slot="sq2"] { grid-area: mb1; width: var(--slot-small); height: var(--slot-small); border-radius:50%; }
+    .slot[data-slot="sq4"] { grid-area: mb2; width: var(--slot-small); height: var(--slot-small); border-radius:50%; }
+
+    .slot:hover { filter: brightness(1.05); }
+    .slot:active { transform: scale(.97); }
 
     /* Neon-Rahmen */
     .slot[data-category="Starmarks"] {
@@ -136,64 +207,209 @@
       border:2px solid silver;
     }
 
+    /* Hero / Charakter */
+    .hero-slot {
+      grid-area: hero;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      padding:10px;
+      background: rgba(255,255,255,0.05);
+      border-radius:10px;
+      position:relative;
+      width:120px;
+    }
+    .hero-slot-title {
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:4px;
+      display:block;
+      text-align:center;
+    }
+    .hero-display {
+      position:relative;
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      overflow:hidden;
+      background: rgba(255,255,255,0.08);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      border:2px solid gold;
+    }
+    .hero-display img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .hero-select {
+      margin-top:4px;
+      font-size:.55rem;
+      padding:4px 8px;
+      background:rgba(255,255,255,0.1);
+      border:none;
+      border-radius:4px;
+      color:#fff;
+      cursor:pointer;
+      text-transform:uppercase;
+    }
+    .hero-select:active { transform: scale(.95); }
+
     /* Buttons */
     .buttons {
       grid-area: btn;
-      display:flex; gap:8px; justify-content:center;
-      width:100%;
+      display:flex;
+      gap:12px;
+      margin-top:6px;
     }
     .buttons button {
-      flex:1; padding:12px 0;
-      background:var(--accent); border:none;
-      border-radius:4px; color:#fff; cursor:pointer;
-      font-weight:bold; transition:background .2s;
+      flex:1;
+      padding:14px 0;
+      background: var(--accent);
+      border:none;
+      border-radius:6px;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transition:filter .2s, transform .15s;
     }
-    .buttons button:hover { background:#e04343 }
+    .buttons button:active { animation: pulse .4s; }
+    .buttons button:hover { filter: brightness(1.05); }
 
-    /* Icon-Picker */
-    #iconPicker {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.5); z-index:20;
-      align-items:center; justify-content:center;
+    /* Picker Overlay (Icons / Characters) */
+    #iconPicker, #charPicker {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.75);
+      z-index:50;
+      align-items:flex-start;
+      justify-content:center;
+      padding:80px 12px 12px;
+      overflow:auto;
     }
-    #iconPicker .panel {
-      background:var(--container-bg);
-      padding:16px; border-radius:8px;
-      display:grid; grid-template-columns:repeat(4,64px);
+    .picker-panel {
+      background: rgba(0,0,0,0.55);
+      padding:18px;
+      border-radius:10px;
+      max-width:1000px;
+      width:100%;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(64px,1fr));
+      gap:12px;
+      position:relative;
+    }
+    .picker-header {
+      margin-bottom:8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
       gap:8px;
+      flex-wrap:wrap;
     }
-    #iconPicker img {
-      width:64px; height:64px; object-fit:cover;
-      cursor:pointer; border:2px solid transparent;
-      border-radius:4px; transition:border-color .2s;
+    .picker-header h2 {
+      margin:0;
+      font-size:1.1rem;
+      font-weight:600;
     }
-    #iconPicker img:hover { border-color:var(--accent) }
+    .close-btn {
+      background: transparent;
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      font-size:1.2rem;
+      padding:4px 8px;
+      border-radius:4px;
+      transition:background .2s;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.08); }
+
+    .picker-item {
+      background: rgba(255,255,255,0.03);
+      border-radius:6px;
+      position:relative;
+      cursor:pointer;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px;
+      transition: transform .15s, box-shadow .2s;
+    }
+    .picker-item:hover { transform: scale(1.03); }
+    .picker-item:active { transform: scale(.97); }
+    .picker-item img {
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      border-radius:4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .build-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "hero hero"
+          "l1 l2"
+          "st1 ct"
+          "st2 ct"
+          "st3 mb1"
+          "st4 mb2"
+          "btn btn";
+      }
+      .slot[data-slot="ct"] { margin: 0 auto; }
+    }
+
+    @media (max-width: 700px) {
+      .search-bar { flex-direction: column; }
+      .search-bar button { width:100%; }
+    }
   </style>
 </head>
 <body>
   <main>
     <!-- Suchleiste -->
     <div class="search-bar">
-      <input id="searchInput" placeholder="Build-Namen…">
+      <input id="searchInput" placeholder="Build-Namen…" />
       <button onclick="searchBuild()">Suchen</button>
     </div>
-    <!-- Ergebnisse -->
     <div id="searchResults"></div>
+
     <!-- Builder -->
     <div class="builder-area">
       <div class="build-container">
+        <!-- Hero / Charakter -->
+        <div class="hero-slot">
+          <span class="hero-slot-title">Charakter</span>
+          <div class="hero-display" id="heroDisplay">
+            <div style="font-size:12px;opacity:.7;">Kein</div>
+          </div>
+          <button class="hero-select" onclick="openCharacterPicker()">Charakter wählen</button>
+        </div>
+
+        <!-- Labels -->
         <div class="label" data-area="l1">Starmarks</div>
         <div class="label" data-area="l2">Artifacts</div>
         <div class="label" data-area="l3">MoonBadges</div>
 
-        <div class="slot" data-slot="sq1" data-category="Starmarks"></div>
-        <div class="slot" data-slot="sq2" data-category="MoonBadges"></div>
-        <div class="slot" data-slot="sq3" data-category="Starmarks"></div>
-        <div class="slot" data-slot="ct"  data-category="Artifacts"></div>
-        <div class="slot" data-slot="sq4" data-category="MoonBadges"></div>
-        <div class="slot" data-slot="sq5" data-category="Starmarks"></div>
-        <div class="slot" data-slot="sq6" data-category="Starmarks"></div>
+        <!-- Slots -->
+        <div class="slot" data-slot="sq1" data-category="Starmarks"><div class="plus">+</div></div>
+        <div class="slot" data-slot="sq3" data-category="Starmarks"><div class="plus">+</div></div>
+        <div class="slot" data-slot="sq5" data-category="Starmarks"><div class="plus">+</div></div>
+        <div class="slot" data-slot="sq6" data-category="Starmarks"><div class="plus">+</div></div>
 
+        <div class="slot" data-slot="ct" data-category="Artifacts"><div class="plus">+</div></div>
+
+        <div class="slot" data-slot="sq2" data-category="MoonBadges"><div class="plus">+</div></div>
+        <div class="slot" data-slot="sq4" data-category="MoonBadges"><div class="plus">+</div></div>
+
+        <!-- Buttons -->
         <div class="buttons">
           <button onclick="saveBuild()">Speichern</button>
           <button onclick="generateLink()">Link kopieren</button>
@@ -203,149 +419,263 @@
   </main>
 
   <!-- Icon Picker Overlay -->
-  <div id="iconPicker" onclick="closePicker()">
-    <div class="panel" onclick="e=>e.stopPropagation()"></div>
+  <div id="iconPicker">
+    <div class="picker-panel" id="iconPanel">
+      <div class="picker-header">
+        <h2>Wähle Icon</h2>
+        <button class="close-btn" onclick="closePicker()">✕</button>
+      </div>
+      <div id="iconItems" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Character Picker Overlay -->
+  <div id="charPicker">
+    <div class="picker-panel">
+      <div class="picker-header">
+        <h2>Charakter wählen</h2>
+        <button class="close-btn" onclick="closeCharacterPicker()">✕</button>
+      </div>
+      <div id="charItems" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); gap:12px;"></div>
+    </div>
   </div>
 
   <script>
     const REPO   = 'Reso1992/RpXBuilder';
     const BRANCH = 'main';
-    let pickerSlot = null;
+    let activeSlot = null;
+    let selectedCharacter = null;
 
     const categoryFolderMap = {
       Starmarks:  'Starmarks',
       Artifacts:  'Artifacts',
-      MoonBadges: 'Moonbadges'
+      MoonBadges: 'Moonbadges',
+      Characters: 'Characters'
     };
 
-    // Icon‐Picker
-    document.querySelectorAll('.slot').forEach(slot=>{
-      slot.addEventListener('click', async ()=>{
-        pickerSlot = slot;
-        const folder = categoryFolderMap[slot.dataset.category];
-        const panel  = document.querySelector('#iconPicker .panel');
-        panel.innerHTML = '';
+    // Icon-Picker: Slot anklicken
+    document.querySelectorAll('.slot').forEach(slot => {
+      slot.addEventListener('click', async () => {
+        activeSlot = slot;
+        const cat = slot.dataset.category;
+        const folder = categoryFolderMap[cat];
+        const container = document.getElementById('iconItems');
+        container.innerHTML = '';
         try {
           const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
-          if (!res.ok) throw new Error(`Folder not found: ${folder}`);
+          if (!res.ok) throw new Error('Ordner nicht gefunden');
           const files = await res.json();
-          files.forEach(f=>{
-            if (f.type==='file') {
-              const img = document.createElement('img');
-              img.src = f.download_url;
-              img.title = f.name;
-              img.onclick = ()=>{
-                pickerSlot.style.backgroundImage = `url(${img.src})`;
-                pickerSlot.classList.add('filled');
-                pickerSlot.dataset.url = img.src;
-                closePicker();
-              };
-              panel.appendChild(img);
-            }
-          });
-        } catch(e){
-          panel.innerHTML = `<p style="color:#f55;">Fehler beim Laden von "${folder}"</p>`;
+          if (!files || !files.length) {
+            container.innerHTML = '<div style="color:#f55;">Keine Icons.</div>';
+          } else {
+            files.forEach(f => {
+              if (f.type === 'file') {
+                const item = document.createElement('div');
+                item.classList.add('picker-item');
+                const img = document.createElement('img');
+                img.src = f.download_url;
+                img.title = f.name;
+                item.appendChild(img);
+                item.onclick = () => {
+                  slot.style.backgroundImage = `url(${f.download_url})`;
+                  slot.classList.add('filled');
+                  slot.dataset.url = f.download_url;
+                  pulseSlot(slot);
+                  closePicker();
+                };
+                container.appendChild(item);
+              }
+            });
+          }
+        } catch (e) {
+          container.innerHTML = `<div style="color:#f55;">Fehler beim Laden</div>`;
+          console.error(e);
         }
         document.getElementById('iconPicker').style.display = 'flex';
       });
     });
 
-    function closePicker(){
+    function closePicker() {
       document.getElementById('iconPicker').style.display = 'none';
     }
 
-    // Speichern + Netlify-Function
-    async function saveBuild(){
-      const name = prompt('Name für Deinen Build:');
-      if(!name) return;
+    // Charakter-Picker
+    async function openCharacterPicker() {
+      const container = document.getElementById('charItems');
+      container.innerHTML = '';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/Characters?ref=${BRANCH}`);
+        if (!res.ok) throw new Error('Characters nicht erreichbar');
+        const files = await res.json();
+        if (!files || !files.length) {
+          container.innerHTML = '<div style="color:#f55;">Keine Charaktere.</div>';
+        } else {
+          files.forEach(f => {
+            if (f.type === 'file') {
+              const item = document.createElement('div');
+              item.classList.add('picker-item');
+              const img = document.createElement('img');
+              img.src = f.download_url;
+              img.title = f.name;
+              item.appendChild(img);
+              item.onclick = () => {
+                selectedCharacter = f;
+                updateHero(f);
+                closeCharacterPicker();
+              };
+              container.appendChild(item);
+            }
+          });
+        }
+      } catch (e) {
+        container.innerHTML = `<div style="color:#f55;">Fehler beim Laden</div>`;
+        console.error(e);
+      }
+      document.getElementById('charPicker').style.display = 'flex';
+    }
+    function closeCharacterPicker() {
+      document.getElementById('charPicker').style.display = 'none';
+    }
+    function updateHero(f) {
+      const disp = document.getElementById('heroDisplay');
+      disp.innerHTML = ''; // reset
+      const img = document.createElement('img');
+      img.src = f.download_url;
+      img.alt = f.name;
+      disp.appendChild(img);
+      // Name unter Bild (optional)
+      if (!disp.querySelector('.name')) {
+        const nameEl = document.createElement('div');
+        nameEl.className = 'name';
+        nameEl.style.fontSize = '10px';
+        nameEl.style.marginTop = '4px';
+        nameEl.textContent = f.name.replace(/\.[^/.]+$/, '');
+        disp.appendChild(nameEl);
+      }
+    }
 
-      // Slots einsammeln
+    function pulseSlot(el) {
+      el.style.transition = 'box-shadow .2s';
+      el.classList.add('pulse-temp');
+      setTimeout(() => {
+        el.classList.remove('pulse-temp');
+      }, 300);
+    }
+
+    // Build speichern (nur GitHub, kein localStorage)
+    async function saveBuild() {
+      const name = prompt('Name für Deinen Build:');
+      if (!name) return;
       const slots = {};
-      document.querySelectorAll('.slot').forEach(s=>{
-        slots[s.dataset.slot] = s.dataset.url||'';
+      document.querySelectorAll('.slot').forEach(s => {
+        slots[s.dataset.slot] = s.dataset.url || '';
       });
 
-      // 1) lokal speichern
-      const local = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
-      local[name] = { slots };
-      localStorage.setItem('rpxBuilds', JSON.stringify(local));
+      // Charakter mitgeben
+      const character = selectedCharacter ? selectedCharacter.download_url : '';
 
-      // 2) GitHub via Netlify-Function
       try {
         const res = await fetch('/.netlify/functions/saveBuilds', {
           method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ name, slots })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, slots, character })
         });
-        if(!res.ok) throw new Error(await res.text());
-        alert(`Build "${name}" gespeichert (lokal & GitHub).`);
-      } catch(err) {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text);
+        }
+        alert(`Build "${name}" gespeichert.`);
+      } catch (err) {
         console.error(err);
         alert('Fehler beim Speichern in GitHub.');
       }
     }
 
-    // Laden aus localStorage
-    function loadBuild(name){
-      const all = JSON.parse(localStorage.getItem('rpxBuilds')||'{}');
-      const data = all[name]?.slots;
-      if(!data) return alert(`Build "${name}" nicht gefunden.`);
-      document.querySelectorAll('.slot').forEach(s=>{
-        const url = data[s.dataset.slot]||'';
-        s.style.backgroundImage = url ? `url(${url})` : '';
-        s.classList.toggle('filled', !!url);
-        if(url) s.dataset.url=url; else delete s.dataset.url;
-      });
+    // Build laden aus builds.json
+    async function loadBuild(name) {
+      try {
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
+        if (!r.ok) throw new Error('builds.json nicht verfügbar');
+        const builds = await r.json();
+        const data = builds[name];
+        if (!data) return alert(`Build "${name}" nicht gefunden.`);
+        // Slots
+        document.querySelectorAll('.slot').forEach(s => {
+          const url = data.slots?.[s.dataset.slot] || '';
+          if (url) {
+            s.style.backgroundImage = `url(${url})`;
+            s.classList.add('filled');
+            s.dataset.url = url;
+          } else {
+            s.style.backgroundImage = '';
+            s.classList.remove('filled');
+            delete s.dataset.url;
+          }
+        });
+        // Character
+        if (data.character) {
+          selectedCharacter = { download_url: data.character, name: '' };
+          updateHero({ download_url: data.character, name: 'BuildChar' });
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Fehler beim Laden des Builds.');
+      }
     }
 
-    // Suche in builds.json im Repo
-    async function searchBuild(){
+    // Suche
+    async function searchBuild() {
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const res = document.getElementById('searchResults');
       res.innerHTML = '';
       if(!q) return;
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if(!r.ok) throw new Error('builds.json nicht verfügbar');
+        if (!r.ok) throw new Error('builds.json nicht verfügbar');
         const builds = await r.json();
-        let found=false;
-        for(const name in builds){
-          if(name.toLowerCase().includes(q)){
+        let found = false;
+        Object.keys(builds).forEach(name => {
+          if (name.toLowerCase().includes(q)) {
             const btn = document.createElement('button');
             btn.textContent = name;
-            btn.onclick = ()=> loadBuild(name);
+            btn.onclick = () => loadBuild(name);
             res.appendChild(btn);
             found = true;
           }
-        }
-        if(!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
-      } catch(e){
+        });
+        if (!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
+      } catch (e) {
         console.error(e);
         res.innerHTML = '<p style="color:#f55;">Fehler beim Laden der Builds.</p>';
       }
     }
 
     // Link generieren
-    function generateLink(){
+    function generateLink() {
       const params = new URLSearchParams();
-      document.querySelectorAll('.slot').forEach(s=>{
-        if(s.dataset.url) params.set(s.dataset.slot, s.dataset.url);
+      document.querySelectorAll('.slot').forEach(s => {
+        if (s.dataset.url) params.set(s.dataset.slot, s.dataset.url);
       });
+      if (selectedCharacter) params.set('character', selectedCharacter.download_url);
       navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`)
         .then(()=>alert('Link kopiert!'));
     }
 
-    // URL‐Parameter beim Laden auslesen
-    window.addEventListener('load', ()=>{
+    // URL beim Laden verarbeiten
+    window.addEventListener('load', () => {
       const p = new URLSearchParams(location.search);
-      document.querySelectorAll('.slot').forEach(s=>{
+      document.querySelectorAll('.slot').forEach(s => {
         const url = p.get(s.dataset.slot);
-        if(url){
+        if (url) {
           s.style.backgroundImage = `url(${url})`;
           s.classList.add('filled');
           s.dataset.url = url;
         }
       });
+      if (p.get('character')) {
+        selectedCharacter = { download_url: p.get('character'), name: '' };
+        updateHero({ download_url: p.get('character'), name: 'URLChar' });
+      }
     });
   </script>
 </body>
