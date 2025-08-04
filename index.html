@@ -562,7 +562,7 @@
 <body>
   <main>
     <div class="search-bar">
-      <input id="searchInput" placeholder="Build-Namen…" />
+      <input id="searchInput" placeholder="Build-Namen…" oninput="searchBuild()" />
       <button onclick="searchBuild()">Suchen</button>
     </div>
     <div id="searchResults"></div>
@@ -801,60 +801,57 @@
       big.style.opacity = '0.18';
     }
 
-    // Neue saveBuild mit Feedback / Duplikat-Prüfung / Timeout
+    // Toast helper
+    function showToast(message, duration = 3000) {
+      const id = 'global-toast';
+      let el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = id;
+        Object.assign(el.style, {
+          position: 'fixed',
+          top: '12px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.85)',
+          padding: '12px 18px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          color: '#fff',
+          zIndex: 3000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          minWidth: '180px',
+          boxShadow: '0 10px 40px rgba(255,76,76,0.3)'
+        });
+        document.body.appendChild(el);
+      }
+      el.textContent = message;
+      el.style.opacity = '1';
+      clearTimeout(el._timeout);
+      el._timeout = setTimeout(() => {
+        el.style.transition = 'opacity .4s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 500);
+      }, duration);
+    }
+
+    // saveBuild ohne localStorage, mit Polling & Feedback
     let isSaving = false;
     async function saveBuild() {
       if (isSaving) return;
       const name = prompt('Name für Deinen Build:');
       if (!name) return;
 
-      let existing = {};
-      try {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-        if (r.ok) existing = await r.json();
-        if (existing[name]) {
-          const overwrite = confirm(`Ein Build mit dem Namen "${name}" existiert bereits. Überschreiben?`);
-          if (!overwrite) return;
-        }
-      } catch (e) {
-        console.warn('Vorhandene Builds konnten nicht geprüft werden, fahre trotzdem fort.', e);
-      }
-
       const saveBtn = Array.from(document.querySelectorAll('.actions button')).find(b => b.textContent.toLowerCase().includes('speichern'));
       const originalText = saveBtn ? saveBtn.textContent : '';
-
-      isSaving = true;
       if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Speichern…';
       }
-
-      const statusElId = 'save-status-toast';
-      let statusEl = document.getElementById(statusElId);
-      if (!statusEl) {
-        statusEl = document.createElement('div');
-        statusEl.id = statusElId;
-        Object.assign(statusEl.style, {
-          position: 'fixed',
-          top: '12px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.85)',
-          padding: '10px 16px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          color: '#fff',
-        });
-        document.body.appendChild(statusEl);
-      }
-      statusEl.innerHTML = `
-        <div style="width:16px;height:16px;border:3px solid rgba(255,255,255,0.3);border-top-color:#ff4c4c;border-radius:50%;animation:spin .8s linear infinite;"></div>
-        Speichere Build "${name}"… das kann 1–3 Sekunden dauern. Bitte nicht erneut klicken.
-      `;
+      isSaving = true;
+      showToast(`Speichere Build "${name}"… das kann 1–3 Sekunden dauern.`);
 
       const slots = {};
       document.querySelectorAll('.slot').forEach(s => {
@@ -863,37 +860,55 @@
       const character = selectedCharacter ? selectedCharacter.download_url : '';
       const payload = { name, slots, character };
 
-      const maxWait = 10000;
-      let timeoutHandle;
       try {
-        const savePromise = fetch('/.netlify/functions/saveBuilds', {
+        // optionaler Name-Check zur Warnung
+        try {
+          const existingRes = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+          if (existingRes.ok) {
+            const existing = await existingRes.json();
+            if (existing[name]) {
+              const overwrite = confirm(`Ein Build mit dem Namen "${name}" existiert bereits. Überschreiben?`);
+              if (!overwrite) throw new Error('Abgebrochen vom Nutzer');
+            }
+          }
+        } catch (e) {
+          console.warn('Check vorhandener Builds fehlgeschlagen', e);
+        }
+
+        const res = await fetch('/.netlify/functions/saveBuilds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        const res = await Promise.race([
-          savePromise,
-          new Promise((_, rej) => {
-            timeoutHandle = setTimeout(() => rej(new Error('Timeout beim Speichern')), maxWait);
-          })
-        ]);
-        clearTimeout(timeoutHandle);
-
         if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `Status ${res.status}`);
+          const txt = await res.text();
+          throw new Error(txt || `Status ${res.status}`);
         }
 
-        statusEl.innerHTML = `✅ Build "${name}" erfolgreich gespeichert.`; 
-        setTimeout(() => { statusEl.remove(); }, 2200);
-        alert(`Build "${name}" gespeichert.`);
+        // Polling: prüfen, ob der Build sichtbar wird
+        let visible = false;
+        for (let i = 0; i < 3; i++) {
+          await new Promise(r => setTimeout(r, 600));
+          try {
+            const check = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+            if (check.ok) {
+              const builds = await check.json();
+              if (builds[name]) {
+                visible = true;
+                break;
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (visible) {
+          showToast(`✅ Build "${name}" gespeichert.`, 2000);
+        } else {
+          showToast(`Build "${name}" gespeichert, erscheint gleich.`, 2500);
+        }
       } catch (err) {
         console.error('Speichern fehlgeschlagen:', err);
-        statusEl.innerHTML = `<span style="color:#f55;">Speichern fehlgeschlagen: ${err.message}</span>`;
-        setTimeout(() => {
-          if (statusEl) statusEl.remove();
-        }, 4000);
+        showToast(`Fehler beim Speichern: ${err.message}`, 4000);
       } finally {
         isSaving = false;
         if (saveBtn) {
@@ -903,28 +918,18 @@
       }
     }
 
+    // loadBuild nur remote
     async function loadBuild(name) {
       let data = null;
-
       try {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
         if (r.ok) {
           const builds = await r.json();
           if (builds[name]) data = builds[name];
         }
       } catch (e) {
-        console.warn('Remote load fehlgeschlagen', e);
+        console.warn('Build laden fehlgeschlagen', e);
       }
-
-      if (!data) {
-        try {
-          const stored = JSON.parse(localStorage.getItem('rpx_builds') || '{}');
-          if (stored[name]) data = stored[name];
-        } catch (e) {
-          console.warn('LocalStorage fallback fehlgeschlagen', e);
-        }
-      }
-
       if (!data) return alert(`Build "${name}" nicht gefunden.`);
 
       document.querySelectorAll('.slot').forEach(s => {
@@ -954,15 +959,30 @@
       }
     }
 
+    // Suche frisch remote, ohne localStorage
+    let searchTimeout = null;
     async function searchBuild() {
-      const q = document.getElementById('searchInput').value.trim().toLowerCase();
-      const res = document.getElementById('searchResults');
-      res.innerHTML = '';
-      if (!q) return;
-      try {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if (!r.ok) throw new Error('builds.json nicht verfügbar');
-        const builds = await r.json();
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(async () => {
+        const q = document.getElementById('searchInput').value.trim().toLowerCase();
+        const res = document.getElementById('searchResults');
+        res.innerHTML = '';
+        if (!q) return;
+
+        let builds = {};
+        try {
+          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+          if (!r.ok) throw new Error('builds.json nicht verfügbar');
+          builds = await r.json();
+        } catch (e) {
+          console.error('Fehler beim Laden der Builds:', e);
+          const errDiv = document.createElement('div');
+          errDiv.textContent = 'Fehler beim Laden der Builds.';
+          errDiv.style.color = '#f55';
+          res.appendChild(errDiv);
+          return;
+        }
+
         let found = false;
         Object.entries(builds).forEach(([name, data]) => {
           if (name.toLowerCase().includes(q)) {
@@ -1003,7 +1023,6 @@
               }
             });
             card.appendChild(slotRow);
-
             res.appendChild(card);
           }
         });
@@ -1013,13 +1032,7 @@
           none.textContent = 'Keine Builds gefunden.';
           res.appendChild(none);
         }
-      } catch (e) {
-        console.error(e);
-        const err = document.createElement('div');
-        err.textContent = 'Fehler beim Laden der Builds.';
-        err.style.color = '#f55';
-        res.appendChild(err);
-      }
+      }, 150);
     }
 
     function generateLink() {
