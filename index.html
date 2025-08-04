@@ -8,63 +8,67 @@
     :root {
       --accent: #ff4c4c;
       --radius: 10px;
-      --shadow: 0 6px 20px rgba(0,0,0,0.5);
+      --shadow: 0 12px 40px rgba(0,0,0,0.6);
       --bg-layer: rgba(0,0,0,0.5);
       --transition: .25s ease;
-      --slot-small: 100px;
-      --slot-big: 200px;
-      --gap: 16px;
+      --slot-small: 110px;
+      --slot-big: 220px;
+      --gap: 18px;
+      --label-color: #ff3f3f;
+      --builder-scale: 1;
+      --label-offset-x: 0;
+      --label-offset-y: 0;
     }
     * { box-sizing:border-box; }
     body {
       margin:0;
       font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
-      background: #000 url('https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/IMG_2579.webp') center/cover no-repeat fixed;
+      background: #000;
       min-height:100vh;
       color:#fff;
-      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
     }
     main {
       position:relative;
       z-index:1;
-      padding: 20px 12px 60px;
+      padding: 14px 16px 40px;
       display:flex;
       flex-direction:column;
       gap:12px;
-      max-width:1250px;
+      width:100%;
+      max-width:1600px;
       margin:0 auto;
     }
 
     /* Suchleiste */
     .search-bar {
       display:flex;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
       width:100%;
-      max-width:1000px;
       margin:0 auto;
-      background: var(--bg-layer);
+      background: rgba(255,255,255,0.03);
       padding:12px 14px;
       border-radius:8px;
       backdrop-filter: blur(6px);
       position:relative;
     }
     .search-bar input {
-      flex:2;
-      min-width:150px;
-      padding:12px 14px;
+      flex:1 1 300px;
+      padding:14px 16px;
       border-radius:6px;
       border:1px solid rgba(255,255,255,0.1);
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.4);
       color:#fff;
       font-size:1rem;
       outline:none;
       transition:box-shadow var(--transition);
+      min-width:160px;
     }
     .search-bar input:focus { box-shadow: 0 0 12px rgba(255,76,76,.7); }
     .search-bar button {
-      flex:0 0 140px;
-      padding:12px;
+      flex:0 0 160px;
+      padding:14px;
       background: var(--accent);
       border:none;
       border-radius:6px;
@@ -73,97 +77,264 @@
       font-weight:600;
       position:relative;
       overflow:hidden;
-      transition:filter .2s;
+      transition:transform .15s, filter .2s;
     }
-    .search-bar button:active { animation: pulse .4s; }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(.95); }
-      100% { transform: scale(1); }
-    }
+    .search-bar button:active { transform: scale(.95); }
+    .search-bar button:hover { filter: brightness(1.05); }
 
+    /* Suchergebnisse / Builds */
     #searchResults {
-      max-height:220px;
-      overflow-y:auto;
-      width:100%;
-      max-width:1000px;
-      margin:0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 6px;
+      max-height: 320px;
+      overflow-y: auto;
+      width: 100%;
+      margin: 0 auto;
     }
-    #searchResults button {
-      width:100%;
-      padding:10px 14px;
-      margin-bottom:6px;
-      background: rgba(0,0,0,0.6);
-      border:none;
-      border-radius:6px;
-      text-align:left;
-      color:#fff;
-      cursor:pointer;
-      transition:background .2s, transform .15s;
-      position:relative;
+    .build-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px;
+      width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      font-size: 11px;
+      gap: 6px;
+      transition: transform .15s, filter .2s;
     }
-    #searchResults button:active { transform: scale(.97); }
-    #searchResults button:hover { background: rgba(0,0,0,0.8); }
+    .build-card:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .build-card .title {
+      font-weight: 600;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    .build-card .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .build-card .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .slots-preview {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+    .slot-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background-size: cover;
+      background-position: center;
+    }
+    .no-builds {
+      width: 100%;
+      padding: 8px;
+      text-align: center;
+    }
 
     /* Builder */
     .builder-area {
       flex:1;
       display:flex;
       justify-content:center;
-      padding:0 6px;
+      align-items:flex-start;
+      padding:0;
+      margin-top:10px;
+      position:relative;
     }
     .build-container {
+      position:relative;
       display:grid;
       gap: var(--gap);
-      background: rgba(0,0,0,0.5);
-      padding:24px;
+      background: rgba(255,255,255,0.03);
+      padding:28px 30px 40px;
       border-radius:14px;
       box-shadow: var(--shadow);
       width:100%;
-      max-width:1100px;
-      grid-template-columns: 120px repeat(3, 1fr) 120px;
+      max-width:1200px;
+      grid-template-columns: minmax(140px, 1fr) 220px 260px 160px;
       grid-template-rows:
         auto
-        repeat(2, auto)
+        auto
+        auto
         auto;
       grid-template-areas:
-        "hero l1 l2 l3 ."
-        "st1 st2 ct mb1 ."
-        "st3 st4 ct mb2 ."
-        "btn btn btn btn btn";
-      position:relative;
+        "hero hero hero hero"
+        "label-starmarks label-artifacts label-artifacts label-moon"
+        "starmarks artifacts artifacts moonbadges"
+        "starmarks artifacts artifacts moonbadges"
+        "actions actions actions actions";
+      align-items:start;
+      overflow: hidden;
+      transform: scale(var(--builder-scale));
     }
 
-    /* Labels */
-    .label {
-      text-transform: uppercase;
-      font-weight:700;
-      font-size:.9rem;
-      letter-spacing:1px;
-      color: #ff4c4c;
+    .builder-character {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      height: 90%;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.18;
+      z-index: 0;
+      transition: opacity .3s;
+    }
+
+    .hero-slot {
+      grid-area: hero;
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      padding:12px 16px;
+      background: rgba(255,255,255,0.04);
+      border-radius:10px;
+      position:relative;
+      width:100%;
+      max-width:250px;
+      z-index:1;
+    }
+    .hero-preview {
+      position:relative;
+      width:100px;
+      height:100px;
+      border-radius:50%;
+      overflow:hidden;
+      background: #111;
+      flex:0 0 auto;
+      border:3px solid gold;
       display:flex;
       justify-content:center;
       align-items:center;
-      gap:6px;
     }
-    .label[data-area="l1"] { grid-area: l1; }
-    .label[data-area="l2"] { grid-area: l2; }
-    .label[data-area="l3"] { grid-area: l3; }
+    .hero-preview img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      filter: none;
+    }
+    .hero-info {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .hero-label {
+      font-size:.65rem;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:0;
+      font-weight:600;
+      color:#fff;
+    }
+    .hero-selection {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .hero-select {
+      padding:8px 16px;
+      background: var(--accent);
+      border:none;
+      border-radius:6px;
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      text-transform:uppercase;
+      transition:transform .15s, filter .2s;
+    }
+    .hero-select:active { transform: scale(.95); }
+    .hero-select:hover { filter: brightness(1.05); }
 
-    /* Slot-Gruppen Visual (Starmarks oben/untereinander) */
-    .starmark-pair {
+    .hero-background {
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      background-size:contain;
+      background-position:center;
+      background-repeat:no-repeat;
+      opacity:.08;
+    }
+
+    .group-label {
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-size:1rem;
+      color: var(--label-color);
+      display:inline-block;
+      margin-bottom:6px;
+      transform: translate(var(--label-offset-x), var(--label-offset-y));
+    }
+    .label-starmarks { grid-area: label-starmarks; justify-self:center; }
+    .label-artifacts { grid-area: label-artifacts; justify-self:center; }
+    .label-moon { grid-area: label-moon; justify-self:center; }
+
+    .starmarks {
+      grid-area: starmarks;
       display:grid;
       grid-template-columns: repeat(2, var(--slot-small));
-      gap:8px;
+      grid-template-rows: repeat(2, var(--slot-small));
+      gap:14px;
+      position:relative;
+      justify-content:center;
     }
-    .starmark-wrapper {
-      grid-area: st1;
+    .artifacts {
+      grid-area: artifacts;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      min-width: var(--slot-big);
+      min-height: var(--slot-big);
+    }
+    .moonbadges {
+      grid-area: moonbadges;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      justify-content:flex-start;
+      align-items:center;
+    }
+    .moon-circle {
+      position:relative;
+      width: var(--slot-small);
+      height: var(--slot-small);
+      border-radius:50%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
 
-    /* Slots */
     .slot {
       position:relative;
-      background: rgba(255,255,255,0.04) center/cover no-repeat;
+      background: rgba(255,255,255,0.02) center/cover no-repeat;
       cursor:pointer;
       border-radius:8px;
       transition: box-shadow var(--transition), transform .15s;
@@ -171,140 +342,89 @@
       justify-content:center;
       align-items:center;
       overflow:hidden;
+      width: var(--slot-small);
+      height: var(--slot-small);
     }
     .slot .plus {
       position:absolute;
-      top:50%; left:50%;
-      transform:translate(-50%, -50%);
-      font-size:32px;
-      color: rgba(255,255,255,0.7);
-      pointer-events:none;
-    }
-    .slot.filled .plus { display:none; }
-
-    .slot[data-slot="sq1"] { grid-area: st1; width: var(--slot-small); height: var(--slot-small); }
-    .slot[data-slot="sq3"] { grid-area: st2; width: var(--slot-small); height: var(--slot-small); }
-    .slot[data-slot="sq5"] { grid-area: st3; width: var(--slot-small); height: var(--slot-small); }
-    .slot[data-slot="sq6"] { grid-area: st4; width: var(--slot-small); height: var(--slot-small); }
-    .slot[data-slot="ct"]  { grid-area: ct; width: var(--slot-big); height: var(--slot-big); border-radius:50%; }
-    .slot[data-slot="sq2"] { grid-area: mb1; width: var(--slot-small); height: var(--slot-small); border-radius:50%; }
-    .slot[data-slot="sq4"] { grid-area: mb2; width: var(--slot-small); height: var(--slot-small); border-radius:50%; }
-
-    .slot:hover { filter: brightness(1.05); }
-    .slot:active { transform: scale(.97); }
-
-    /* Neon-Rahmen */
-    .slot[data-category="Starmarks"] {
-      box-shadow: 0 0 8px gold, 0 0 16px gold;
-      border:2px solid gold;
-    }
-    .slot[data-category="Artifacts"] {
-      box-shadow: 0 0 8px red, 0 0 16px red;
-      border:2px solid red;
-    }
-    .slot[data-category="MoonBadges"] {
-      box-shadow: 0 0 8px silver, 0 0 16px silver;
-      border:2px solid silver;
-    }
-
-    /* Hero / Charakter */
-    .hero-slot {
-      grid-area: hero;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:6px;
-      padding:10px;
-      background: rgba(255,255,255,0.05);
-      border-radius:10px;
-      position:relative;
-      width:120px;
-    }
-    .hero-slot-title {
-      font-size:.75rem;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin-bottom:4px;
-      display:block;
-      text-align:center;
-    }
-    .hero-display {
-      position:relative;
-      width:80px;
-      height:80px;
-      border-radius:50%;
-      overflow:hidden;
-      background: rgba(255,255,255,0.08);
       display:flex;
       justify-content:center;
       align-items:center;
-      border:2px solid gold;
+      inset:0;
+      font-size:32px;
+      color: rgba(255,255,255,0.75);
+      pointer-events:none;
     }
-    .hero-display img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .hero-select {
-      margin-top:4px;
-      font-size:.55rem;
-      padding:4px 8px;
-      background:rgba(255,255,255,0.1);
-      border:none;
-      border-radius:4px;
-      color:#fff;
-      cursor:pointer;
-      text-transform:uppercase;
-    }
-    .hero-select:active { transform: scale(.95); }
+    .slot.filled .plus { display:none; }
+    .slot:hover { filter: brightness(1.08); }
+    .slot:active { transform: scale(.95); }
 
-    /* Buttons */
-    .buttons {
-      grid-area: btn;
-      display:flex;
-      gap:12px;
-      margin-top:6px;
+    .slot[data-category="Starmarks"] {
+      box-shadow: 0 0 14px gold, 0 0 28px gold;
+      border:3px solid gold;
     }
-    .buttons button {
+    .slot[data-category="Artifacts"] {
+      box-shadow: 0 0 14px red, 0 0 28px red;
+      border:3px solid red;
+      border-radius:50%;
+      width: var(--slot-big);
+      height: var(--slot-big);
+    }
+    .slot[data-category="MoonBadges"] {
+      box-shadow: 0 0 14px #ccc, 0 0 28px #ccc;
+      border:3px solid rgba(255,255,255,.6);
+      border-radius:50%;
+      width: var(--slot-small);
+      height: var(--slot-small);
+    }
+
+    .actions {
+      grid-area: actions;
+      display:flex;
+      gap:16px;
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+    .actions button {
       flex:1;
-      padding:14px 0;
+      min-width:200px;
+      padding:16px 12px;
       background: var(--accent);
       border:none;
-      border-radius:6px;
+      border-radius:8px;
       color:#fff;
       font-weight:600;
       cursor:pointer;
-      position:relative;
-      overflow:hidden;
-      transition:filter .2s, transform .15s;
+      transition:transform .15s, filter .2s;
     }
-    .buttons button:active { animation: pulse .4s; }
-    .buttons button:hover { filter: brightness(1.05); }
+    .actions button:active { transform: scale(.95); }
+    .actions button:hover { filter: brightness(1.05); }
 
     /* Picker Overlay (Icons / Characters) */
     #iconPicker, #charPicker {
       display:none;
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,0.75);
-      z-index:50;
+      background:rgba(0,0,0,0.85);
+      z-index:90;
       align-items:flex-start;
       justify-content:center;
-      padding:80px 12px 12px;
+      padding:80px 14px 14px;
       overflow:auto;
     }
     .picker-panel {
-      background: rgba(0,0,0,0.55);
+      background: rgba(255,255,255,0.04);
       padding:18px;
       border-radius:10px;
       max-width:1000px;
       width:100%;
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(64px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(80px,1fr));
       gap:12px;
       position:relative;
     }
     .picker-header {
+      grid-column:1/-1;
       margin-bottom:8px;
       display:flex;
       justify-content:space-between;
@@ -314,7 +434,7 @@
     }
     .picker-header h2 {
       margin:0;
-      font-size:1.1rem;
+      font-size:1.2rem;
       font-weight:600;
     }
     .close-btn {
@@ -323,12 +443,22 @@
       color:#fff;
       cursor:pointer;
       font-size:1.2rem;
-      padding:4px 8px;
-      border-radius:4px;
+      padding:6px 10px;
+      border-radius:6px;
       transition:background .2s;
     }
     .close-btn:hover { background: rgba(255,255,255,0.08); }
 
+    /* Grid für Picker-Inhalte: ca. 10 nebeneinander in normaler Größe */
+    #charItems, #iconItems {
+      display: grid;
+      grid-template-columns: repeat(10, 100px);
+      gap:8px;
+      padding:6px 0;
+      max-height:60vh;
+      overflow:auto;
+      justify-content: start;
+    }
     .picker-item {
       background: rgba(255,255,255,0.03);
       border-radius:6px;
@@ -338,11 +468,13 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:4px;
+      padding:6px;
       transition: transform .15s, box-shadow .2s;
+      aspect-ratio:1/1;
+      min-width:0;
     }
-    .picker-item:hover { transform: scale(1.03); }
-    .picker-item:active { transform: scale(.97); }
+    .picker-item:hover { transform: scale(1.05); }
+    .picker-item:active { transform: scale(.95); }
     .picker-item img {
       max-width:100%;
       max-height:100%;
@@ -350,25 +482,34 @@
       border-radius:4px;
     }
 
-    /* Responsive */
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       .build-container {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         grid-template-areas:
-          "hero hero"
-          "l1 l2"
-          "st1 ct"
-          "st2 ct"
-          "st3 mb1"
-          "st4 mb2"
-          "btn btn";
+          "hero hero hero"
+          "label-starmarks label-artifacts label-moon"
+          "starmarks artifacts moonbadges"
+          "starmarks artifacts moonbadges"
+          "actions actions actions";
       }
-      .slot[data-slot="ct"] { margin: 0 auto; }
+      .moonbadges { align-items:flex-start; }
     }
-
-    @media (max-width: 700px) {
-      .search-bar { flex-direction: column; }
-      .search-bar button { width:100%; }
+    @media (max-width: 900px) {
+      .build-container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "hero"
+          "label-starmarks"
+          "starmarks"
+          "label-artifacts"
+          "artifacts"
+          "label-moon"
+          "moonbadges"
+          "actions";
+      }
+      .starmarks { justify-content:center; }
+      .artifacts { justify-content:center; }
+      .moonbadges { flex-direction:row; gap:12px; }
     }
   </style>
 </head>
@@ -384,50 +525,57 @@
     <!-- Builder -->
     <div class="builder-area">
       <div class="build-container">
-        <!-- Hero / Charakter -->
+        <div class="builder-character" id="builderCharacterBg"></div>
+
+        <!-- Charakter -->
         <div class="hero-slot">
-          <span class="hero-slot-title">Charakter</span>
-          <div class="hero-display" id="heroDisplay">
-            <div style="font-size:12px;opacity:.7;">Kein</div>
+          <div class="hero-preview" id="heroDisplay">
+            <div style="font-size:12px;opacity:.7;" id="noCharText">Keine</div>
           </div>
-          <button class="hero-select" onclick="openCharacterPicker()">Charakter wählen</button>
+          <div class="hero-info">
+            <div class="hero-label">Charakter</div>
+            <div class="hero-selection">
+              <button class="hero-select" onclick="openCharacterPicker()">Charakter wählen</button>
+            </div>
+          </div>
         </div>
 
         <!-- Labels -->
-        <div class="label" data-area="l1">Starmarks</div>
-        <div class="label" data-area="l2">Artifacts</div>
-        <div class="label" data-area="l3">MoonBadges</div>
+        <div class="group-label label-starmarks">Starmarks</div>
+        <div class="group-label label-artifacts">Artifacts</div>
+        <div class="group-label label-moon">Moonbadges</div>
 
-        <!-- Slots -->
-        <div class="slot" data-slot="sq1" data-category="Starmarks"><div class="plus">+</div></div>
-        <div class="slot" data-slot="sq3" data-category="Starmarks"><div class="plus">+</div></div>
-        <div class="slot" data-slot="sq5" data-category="Starmarks"><div class="plus">+</div></div>
-        <div class="slot" data-slot="sq6" data-category="Starmarks"><div class="plus">+</div></div>
+        <!-- Starmarks 2x2 -->
+        <div class="starmarks">
+          <div class="slot" data-slot="sq1" data-category="Starmarks"><div class="plus">+</div></div>
+          <div class="slot" data-slot="sq3" data-category="Starmarks"><div class="plus">+</div></div>
+          <div class="slot" data-slot="sq5" data-category="Starmarks"><div class="plus">+</div></div>
+          <div class="slot" data-slot="sq6" data-category="Starmarks"><div class="plus">+</div></div>
+        </div>
 
-        <div class="slot" data-slot="ct" data-category="Artifacts"><div class="plus">+</div></div>
+        <!-- Artifacts -->
+        <div class="artifacts">
+          <div class="slot" data-slot="ct" data-category="Artifacts"><div class="plus">+</div></div>
+        </div>
 
-        <div class="slot" data-slot="sq2" data-category="MoonBadges"><div class="plus">+</div></div>
-        <div class="slot" data-slot="sq4" data-category="MoonBadges"><div class="plus">+</div></div>
+        <!-- Moonbadges -->
+        <div class="moonbadges">
+          <div class="moon-circle">
+            <div class="slot" data-slot="sq2" data-category="MoonBadges"><div class="plus">+</div></div>
+          </div>
+          <div class="moon-circle">
+            <div class="slot" data-slot="sq4" data-category="MoonBadges"><div class="plus">+</div></div>
+          </div>
+        </div>
 
-        <!-- Buttons -->
-        <div class="buttons">
+        <!-- Aktionen -->
+        <div class="actions">
           <button onclick="saveBuild()">Speichern</button>
           <button onclick="generateLink()">Link kopieren</button>
         </div>
       </div>
     </div>
   </main>
-
-  <!-- Icon Picker Overlay -->
-  <div id="iconPicker">
-    <div class="picker-panel" id="iconPanel">
-      <div class="picker-header">
-        <h2>Wähle Icon</h2>
-        <button class="close-btn" onclick="closePicker()">✕</button>
-      </div>
-      <div id="iconItems" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:10px;"></div>
-    </div>
-  </div>
 
   <!-- Character Picker Overlay -->
   <div id="charPicker">
@@ -436,7 +584,61 @@
         <h2>Charakter wählen</h2>
         <button class="close-btn" onclick="closeCharacterPicker()">✕</button>
       </div>
-      <div id="charItems" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); gap:12px;"></div>
+      <div id="charItems"></div>
+    </div>
+  </div>
+
+  <!-- Icon Picker Overlay -->
+  <div id="iconPicker">
+    <div class="picker-panel">
+      <div class="picker-header">
+        <h2>Icon wählen</h2>
+        <button class="close-btn" onclick="closePicker()">✕</button>
+      </div>
+      <div id="iconItems"></div>
+    </div>
+  </div>
+
+  <!-- Dev Panel (unverändert, wie vorher) -->
+  <button id="devToggle" style="position:fixed; top:12px; right:12px; background:#111; border:2px solid #ff4c4c; padding:8px 14px; color:#fff; border-radius:6px; cursor:pointer; z-index:999; font-size:0.85rem; backdrop-filter:blur(4px);">Dev</button>
+  <div id="devPanel" aria-label="Dev Panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.95); padding:16px 18px; border-radius:10px; width:340px; max-width:90vw; box-shadow:0 0 24px rgba(255,76,76,.7); z-index:1000; font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; color:#fff; font-size:13px; gap:8px;">
+    <button id="devClose" style="position:absolute; top:6px; right:6px; background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
+    <h4 style="margin:0 0 6px; font-size:1rem; letter-spacing:1px;">Developer Panel</h4>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpSlotSmall" style="flex:1; min-width:80px;">Starmark / MoonBadge</label>
+      <input id="inpSlotSmall" type="number" min="50" step="5" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpSlotBig" style="flex:1; min-width:80px;">Artifact</label>
+      <input id="inpSlotBig" type="number" min="100" step="5" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpGap" style="flex:1; min-width:80px;">Gap</label>
+      <input id="inpGap" type="number" min="0" step="2" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpBuilderScale" style="flex:1; min-width:80px;">Builder Scale</label>
+      <input id="inpBuilderScale" type="number" step="0.01" min="0.6" max="1.5" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpLabelOffsetX" style="flex:1; min-width:80px;">Label Offset X</label>
+      <input id="inpLabelOffsetX" type="number" step="1" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div class="dev-row" style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+      <label for="inpLabelOffsetY" style="flex:1; min-width:80px;">Label Offset Y</label>
+      <input id="inpLabelOffsetY" type="number" step="1" style="flex:1; padding:4px 6px; background:#1a1a1a; border:1px solid #444; border-radius:4px; color:#fff; font-size:12px; width:100%;" />
+    </div>
+    <div id="devActions" style="display:flex; gap:6px; margin-top:4px;">
+      <button id="applyDev" style="flex:1; padding:8px; background:#ff4c4c; border:none; border-radius:6px; cursor:pointer; color:#fff; font-weight:600; font-size:12px;">Anwenden</button>
+      <button id="resetDev" style="flex:1; padding:8px; background:#ff4c4c; border:none; border-radius:6px; cursor:pointer; color:#fff; font-weight:600; font-size:12px;">Reset</button>
+      <button id="copyCSS" style="flex:1; padding:8px; background:#ff4c4c; border:none; border-radius:6px; cursor:pointer; color:#fff; font-weight:600; font-size:12px;">Export CSS</button>
+    </div>
+    <div style="margin-top:6px;">
+      <div style="margin-bottom:4px;">Aktueller CSS-Block:</div>
+      <textarea id="exportCSS" readonly style="width:100%; height:80px; background:#121212; border:1px solid #333; color:#fff; padding:6px; border-radius:5px; font-family: monospace; font-size:11px; resize: vertical;"></textarea>
+    </div>
+    <div style="font-size:11px; margin-top:6px;">
+      Änderungen bleiben lokal. Wenn du sie dauerhaft willst: kopiere den Block oben in dein <code>:root</code>.
     </div>
   </div>
 
@@ -453,20 +655,20 @@
       Characters: 'Characters'
     };
 
-    // Icon-Picker: Slot anklicken
+    // Slot klicken für Icon
     document.querySelectorAll('.slot').forEach(slot => {
       slot.addEventListener('click', async () => {
         activeSlot = slot;
         const cat = slot.dataset.category;
         const folder = categoryFolderMap[cat];
         const container = document.getElementById('iconItems');
-        container.innerHTML = '';
+        if (container) container.innerHTML = '';
         try {
           const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
           if (!res.ok) throw new Error('Ordner nicht gefunden');
           const files = await res.json();
-          if (!files || !files.length) {
-            container.innerHTML = '<div style="color:#f55;">Keine Icons.</div>';
+          if (!files.length) {
+            if (container) container.innerHTML = '<div style="color:#f55;">Keine Icons.</div>';
           } else {
             files.forEach(f => {
               if (f.type === 'file') {
@@ -480,7 +682,6 @@
                   slot.style.backgroundImage = `url(${f.download_url})`;
                   slot.classList.add('filled');
                   slot.dataset.url = f.download_url;
-                  pulseSlot(slot);
                   closePicker();
                 };
                 container.appendChild(item);
@@ -488,18 +689,17 @@
             });
           }
         } catch (e) {
-          container.innerHTML = `<div style="color:#f55;">Fehler beim Laden</div>`;
+          if (container) container.innerHTML = `<div style="color:#f55;">Fehler beim Laden</div>`;
           console.error(e);
         }
         document.getElementById('iconPicker').style.display = 'flex';
       });
     });
-
     function closePicker() {
       document.getElementById('iconPicker').style.display = 'none';
     }
 
-    // Charakter-Picker
+    // Charakter Picker öffnen
     async function openCharacterPicker() {
       const container = document.getElementById('charItems');
       container.innerHTML = '';
@@ -507,7 +707,7 @@
         const res = await fetch(`https://api.github.com/repos/${REPO}/contents/Characters?ref=${BRANCH}`);
         if (!res.ok) throw new Error('Characters nicht erreichbar');
         const files = await res.json();
-        if (!files || !files.length) {
+        if (!files.length) {
           container.innerHTML = '<div style="color:#f55;">Keine Charaktere.</div>';
         } else {
           files.forEach(f => {
@@ -536,33 +736,43 @@
     function closeCharacterPicker() {
       document.getElementById('charPicker').style.display = 'none';
     }
+
+    // Hero aktualisieren (ohne Name daneben)
     function updateHero(f) {
       const disp = document.getElementById('heroDisplay');
-      disp.innerHTML = ''; // reset
+      const noText = document.getElementById('noCharText');
+      if (noText) noText.style.display = 'none';
+      disp.innerHTML = '';
       const img = document.createElement('img');
       img.src = f.download_url;
       img.alt = f.name;
       disp.appendChild(img);
-      // Name unter Bild (optional)
-      if (!disp.querySelector('.name')) {
-        const nameEl = document.createElement('div');
-        nameEl.className = 'name';
-        nameEl.style.fontSize = '10px';
-        nameEl.style.marginTop = '4px';
-        nameEl.textContent = f.name.replace(/\.[^/.]+$/, '');
-        disp.appendChild(nameEl);
+
+      // Hintergrund im hero-slot
+      const heroSlot = disp.closest('.hero-slot');
+      if (heroSlot) {
+        let bg = heroSlot.querySelector('.hero-background');
+        if (!bg) {
+          bg = document.createElement('div');
+          bg.className = 'hero-background';
+          heroSlot.appendChild(bg);
+        }
+        bg.style.backgroundImage = `url(${f.download_url})`;
       }
+
+      // großes Hintergrundbild im Builder
+      const container = document.querySelector('.build-container');
+      let big = container.querySelector('.builder-character');
+      if (!big) {
+        big = document.createElement('div');
+        big.className = 'builder-character';
+        container.prepend(big);
+      }
+      big.style.backgroundImage = `url(${f.download_url})`;
+      big.style.opacity = '0.18';
     }
 
-    function pulseSlot(el) {
-      el.style.transition = 'box-shadow .2s';
-      el.classList.add('pulse-temp');
-      setTimeout(() => {
-        el.classList.remove('pulse-temp');
-      }, 300);
-    }
-
-    // Build speichern (nur GitHub, kein localStorage)
+    // Build speichern (GitHub + Fallback localStorage)
     async function saveBuild() {
       const name = prompt('Name für Deinen Build:');
       if (!name) return;
@@ -570,56 +780,57 @@
       document.querySelectorAll('.slot').forEach(s => {
         slots[s.dataset.slot] = s.dataset.url || '';
       });
-
-      // Charakter mitgeben
       const character = selectedCharacter ? selectedCharacter.download_url : '';
-
+      const payload = { name, slots, character };
+      // Versuche GitHub / Netlify
       try {
         const res = await fetch('/.netlify/functions/saveBuilds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, slots, character })
         });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
-        alert(`Build "${name}" gespeichert.`);
+        if (!res.ok) throw new Error('Remote save failed');
+        alert(`Build "${name}" gespeichert (remote).`);
       } catch (err) {
-        console.error(err);
-        alert('Fehler beim Speichern in GitHub.');
+        console.warn('Remote save fehlgeschlagen, speichere lokal.', err);
+        // lokal speichern
+        const stored = JSON.parse(localStorage.getItem('rpx_builds') || '{}');
+        stored[name] = { slots, character };
+        localStorage.setItem('rpx_builds', JSON.stringify(stored));
+        alert(`Build "${name}" lokal gespeichert (Fallback).`);
       }
     }
 
-    // Build laden aus builds.json
+    // Build laden (priorisiert remote, sonst lokal)
     async function loadBuild(name) {
+      let data = null;
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if (!r.ok) throw new Error('builds.json nicht verfügbar');
-        const builds = await r.json();
-        const data = builds[name];
-        if (!data) return alert(`Build "${name}" nicht gefunden.`);
-        // Slots
-        document.querySelectorAll('.slot').forEach(s => {
-          const url = data.slots?.[s.dataset.slot] || '';
-          if (url) {
-            s.style.backgroundImage = `url(${url})`;
-            s.classList.add('filled');
-            s.dataset.url = url;
-          } else {
-            s.style.backgroundImage = '';
-            s.classList.remove('filled');
-            delete s.dataset.url;
-          }
-        });
-        // Character
-        if (data.character) {
-          selectedCharacter = { download_url: data.character, name: '' };
-          updateHero({ download_url: data.character, name: 'BuildChar' });
+        if (r.ok) {
+          const builds = await r.json();
+          if (builds[name]) data = builds[name];
         }
-      } catch (e) {
-        console.error(e);
-        alert('Fehler beim Laden des Builds.');
+      } catch {}
+      if (!data) {
+        const stored = JSON.parse(localStorage.getItem('rpx_builds') || '{}');
+        if (stored[name]) data = stored[name];
+      }
+      if (!data) return alert(`Build "${name}" nicht gefunden.`);
+      document.querySelectorAll('.slot').forEach(s => {
+        const url = data.slots?.[s.dataset.slot] || '';
+        if (url) {
+          s.style.backgroundImage = `url(${url})`;
+          s.classList.add('filled');
+          s.dataset.url = url;
+        } else {
+          s.style.backgroundImage = '';
+          s.classList.remove('filled');
+          delete s.dataset.url;
+        }
+      });
+      if (data.character) {
+        selectedCharacter = { download_url: data.character, name: '' };
+        updateHero({ download_url: data.character, name: 'BuildChar' });
       }
     }
 
@@ -628,25 +839,68 @@
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const res = document.getElementById('searchResults');
       res.innerHTML = '';
-      if(!q) return;
+      if (!q) return;
+      // kombiniere remote + lokal
+      let builds = {};
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if (!r.ok) throw new Error('builds.json nicht verfügbar');
-        const builds = await r.json();
-        let found = false;
-        Object.keys(builds).forEach(name => {
-          if (name.toLowerCase().includes(q)) {
-            const btn = document.createElement('button');
-            btn.textContent = name;
-            btn.onclick = () => loadBuild(name);
-            res.appendChild(btn);
-            found = true;
-          }
+        if (r.ok) {
+          builds = await r.json();
+        }
+      } catch {}
+      // local ergänzt oder überschreibt nicht(remote)
+      try {
+        const local = JSON.parse(localStorage.getItem('rpx_builds') || '{}');
+        builds = { ...local, ...builds };
+      } catch {}
+
+      let found = false;
+      Object.entries(builds).forEach(([name, data]) => {
+        if (!name.toLowerCase().includes(q)) return;
+        found = true;
+
+        const card = document.createElement('div');
+        card.classList.add('build-card');
+        card.onclick = () => loadBuild(name);
+
+        // Avatar: Charakter oder erstes Slot-Icon
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        const imgEl = document.createElement('img');
+        if (data.character) {
+          imgEl.src = data.character;
+        } else {
+          const slotUrl = Object.values(data.slots || {}).find(u => u);
+          imgEl.src = slotUrl || '';
+        }
+        avatar.appendChild(imgEl);
+        card.appendChild(avatar);
+
+        // Titel
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = name;
+        card.appendChild(title);
+
+        // kleine Vorschau der Slots
+        const preview = document.createElement('div');
+        preview.className = 'slots-preview';
+        Object.entries(data.slots || {}).forEach(([slotKey, url]) => {
+          if (!url) return;
+          const thumb = document.createElement('div');
+          thumb.className = 'slot-thumb';
+          thumb.style.backgroundImage = `url(${url})`;
+          preview.appendChild(thumb);
         });
-        if (!found) res.innerHTML = '<p>Keine Builds gefunden.</p>';
-      } catch (e) {
-        console.error(e);
-        res.innerHTML = '<p style="color:#f55;">Fehler beim Laden der Builds.</p>';
+        card.appendChild(preview);
+
+        res.appendChild(card);
+      });
+      if (!found) {
+        const none = document.createElement('div');
+        none.className = 'no-builds';
+        none.textContent = 'Keine Builds gefunden.';
+        res.appendChild(none);
       }
     }
 
@@ -658,10 +912,10 @@
       });
       if (selectedCharacter) params.set('character', selectedCharacter.download_url);
       navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`)
-        .then(()=>alert('Link kopiert!'));
+        .then(() => alert('Link kopiert!'));
     }
 
-    // URL beim Laden verarbeiten
+    // URL beim Laden
     window.addEventListener('load', () => {
       const p = new URLSearchParams(location.search);
       document.querySelectorAll('.slot').forEach(s => {
@@ -676,7 +930,101 @@
         selectedCharacter = { download_url: p.get('character'), name: '' };
         updateHero({ download_url: p.get('character'), name: 'URLChar' });
       }
+
+      // Dev panel init
+      initDevPanel();
     });
+
+    // Dev Panel Logic
+    function initDevPanel(){
+      const PASSWORD = 'devpass';
+      const devToggle = document.getElementById('devToggle');
+      const panel = document.getElementById('devPanel');
+      const closeBtn = document.getElementById('devClose');
+      const inpSlotSmall = document.getElementById('inpSlotSmall');
+      const inpSlotBig = document.getElementById('inpSlotBig');
+      const inpGap = document.getElementById('inpGap');
+      const inpBuilderScale = document.getElementById('inpBuilderScale');
+      const inpLabelOffsetX = document.getElementById('inpLabelOffsetX');
+      const inpLabelOffsetY = document.getElementById('inpLabelOffsetY');
+      const exportCSS = document.getElementById('exportCSS');
+
+      const defaults = {
+        '--slot-small': 110,
+        '--slot-big': 220,
+        '--gap': 18,
+        'builder-scale': 1,
+        labelOffsetX: 0,
+        labelOffsetY: 0
+      };
+      let state = JSON.parse(localStorage.getItem('rpxDevConfig')||'{}');
+      state = Object.assign({}, defaults, state);
+
+      function syncInputs(){
+        inpSlotSmall.value = state['--slot-small'];
+        inpSlotBig.value = state['--slot-big'];
+        inpGap.value = state['--gap'];
+        inpBuilderScale.value = state['builder-scale'];
+        inpLabelOffsetX.value = state.labelOffsetX;
+        inpLabelOffsetY.value = state.labelOffsetY;
+      }
+      function applyState(){
+        document.documentElement.style.setProperty('--slot-small', state['--slot-small'] + 'px');
+        document.documentElement.style.setProperty('--slot-big', state['--slot-big'] + 'px');
+        document.documentElement.style.setProperty('--gap', state['--gap'] + 'px');
+        document.documentElement.style.setProperty('--builder-scale', state['builder-scale']);
+        document.documentElement.style.setProperty('--label-offset-x', state.labelOffsetX + 'px');
+        document.documentElement.style.setProperty('--label-offset-y', state.labelOffsetY + 'px');
+        const container = document.querySelector('.build-container');
+        if(container) container.style.transform = `scale(${state['builder-scale']})`;
+        updateExport();
+      }
+      function updateExport(){
+        exportCSS.value = `
+:root {
+  --slot-small: ${state['--slot-small']}px;
+  --slot-big: ${state['--slot-big']}px;
+  --gap: ${state['--gap']}px;
+  --builder-scale: ${state['builder-scale']};
+  --label-offset-x: ${state.labelOffsetX}px;
+  --label-offset-y: ${state.labelOffsetY}px;
+}
+`.trim();
+      }
+      function persist(){ localStorage.setItem('rpxDevConfig', JSON.stringify(state)); }
+
+      syncInputs();
+      applyState();
+
+      devToggle.addEventListener('click', ()=>{
+        const attempt = prompt('Dev Panel Passwort:');
+        if(attempt !== PASSWORD){ alert('Falsches Passwort'); return; }
+        panel.style.display='flex';
+      });
+      closeBtn.addEventListener('click', ()=> panel.style.display='none');
+
+      document.getElementById('applyDev').addEventListener('click', ()=>{
+        state['--slot-small'] = parseInt(inpSlotSmall.value) || defaults['--slot-small'];
+        state['--slot-big'] = parseInt(inpSlotBig.value) || defaults['--slot-big'];
+        state['--gap'] = parseInt(inpGap.value) || defaults['--gap'];
+        state['builder-scale'] = parseFloat(inpBuilderScale.value) || defaults['builder-scale'];
+        state.labelOffsetX = parseInt(inpLabelOffsetX.value) || 0;
+        state.labelOffsetY = parseInt(inpLabelOffsetY.value) || 0;
+        persist();
+        applyState();
+      });
+      document.getElementById('resetDev').addEventListener('click', ()=>{
+        state = Object.assign({}, defaults);
+        syncInputs();
+        persist();
+        applyState();
+      });
+      document.getElementById('copyCSS').addEventListener('click', ()=>{
+        exportCSS.select();
+        document.execCommand('copy');
+        alert('CSS kopiert. Wenn du willst, kannst du es später manuell ins :root schreiben.');
+      });
+    }
   </script>
 </body>
 </html>
