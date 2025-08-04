@@ -23,11 +23,20 @@ exports.handler = async function(event, context) {
       body: 'Invalid JSON'
     };
   }
-  const { name, slots } = payload;
+  const { name, slots, character } = payload;
+
   if (!name || typeof slots !== 'object') {
     return {
       statusCode: 400,
       body: 'Missing build name or slots'
+    };
+  }
+
+  // Optional: einfache Validierung von character (falls gesetzt)
+  if (character && typeof character !== 'string') {
+    return {
+      statusCode: 400,
+      body: 'Invalid character field'
     };
   }
 
@@ -50,7 +59,7 @@ exports.handler = async function(event, context) {
   try {
     const metaRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/${PATH}?ref=${BRANCH}`,
-      { headers: { Authorization: `Bearer ${TOKEN}` } }
+      { headers: { Authorization: `Bearer Bearer ${TOKEN}`.replace('Bearer Bearer','Bearer') } } // sicherstellen, dass nur einmal Bearer steht
     );
     if (metaRes.ok) {
       const metaData = await metaRes.json();
@@ -64,8 +73,8 @@ exports.handler = async function(event, context) {
     builds = {};
   }
 
-  // 2) Neuen Build hinzufügen
-  builds[name] = { slots };
+  // 2) Neuen Build hinzufügen (inkl. character)
+  builds[name] = { slots, character: character || '' };
 
   // 3) builds.json als Base64 kodieren
   const content = Buffer.from(JSON.stringify(builds, null, 2)).toString('base64');
