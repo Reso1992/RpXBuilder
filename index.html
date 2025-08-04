@@ -1,1192 +1,928 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>RpX Builder &amp; Search</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --accent: #ff4c4c;
-      --radius: 10px;
-      --shadow: 0 12px 40px rgba(0,0,0,0.6);
-      --transition: .25s ease;
-      --slot-small: 110px;
-      --slot-big: 220px;
-      --gap: 18px;
-      --label-color: #ff3f3f;
-      --builder-scale: 1;
-      --label-offset-x: 0;
-      --label-offset-y: 0;
-      --picker-bg: rgba(255,255,255,0.04);
-    }
-    * { box-sizing:border-box; }
-    body {
-      margin:0;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
-      background: #000;
-      min-height:100vh;
-      color:#fff;
-      overflow-x:hidden;
-    }
-    main {
-      position:relative;
-      z-index:1;
-      padding: 14px 16px 40px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      width:100%;
-      max-width:1600px;
-      margin:0 auto;
-    }
-    .search-bar {
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      width:100%;
-      margin:0 auto;
-      background: rgba(255,255,255,0.03);
-      padding:12px 14px;
-      border-radius:8px;
-      backdrop-filter: blur(6px);
-      position:relative;
-    }
-    .search-bar input {
-      flex:1 1 300px;
-      padding:14px 16px;
-      border-radius:6px;
-      border:1px solid rgba(255,255,255,0.1);
-      background: rgba(0,0,0,0.4);
-      color:#fff;
-      font-size:1rem;
-      outline:none;
-      transition:box-shadow var(--transition);
-      min-width:160px;
-    }
-    .search-bar input:focus { box-shadow: 0 0 12px rgba(255,76,76,.7); }
-    .search-bar button {
-      flex:0 0 160px;
-      padding:14px;
-      background: var(--accent);
-      border:none;
-      border-radius:6px;
-      color:#fff;
-      cursor:pointer;
-      font-weight:600;
-      position:relative;
-      overflow:hidden;
-      transition:transform .15s, filter .2s;
-    }
-    .search-bar button:active { transform: scale(.95); }
-    .search-bar button:hover { filter: brightness(1.05); }
+<meta charset="UTF-8" />
+<title>RpX Neon Builder - Charakter oben mit Rüstung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg:#0f0f25;
+    --panel:#1f2145;
+    --radius:10px;
+    --neon1:#00ffe7;
+    --neon2:#ff5ec7;
+    --text:#e3effb;
+    --transition:.25s cubic-bezier(.3,.1,.25,1);
+    --border:1px solid rgba(255,255,255,0.08);
+    --shadow:0 30px 90px -10px rgba(165,108,255,0.3);
+  }
+  *{box-sizing:border-box;}
+  body {
+    margin:0;
+    background: linear-gradient(135deg,#0f0f25 0%,#1a1a45 80%);
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+    color: var(--text);
+    min-height:100vh;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 60%);
+    mix-blend-mode:overlay;
+  }
+  .top-character {
+    max-width:1400px;
+    margin:0 auto;
+    padding:16px 20px 4px;
+  }
+  .container {
+    max-width:1400px;
+    margin:0 auto;
+    padding:4px 20px 60px;
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:20px;
+  }
 
-    #searchResults {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 6px;
-      max-height: 280px;
-      overflow-y: auto;
-      width:100%;
-      margin:0 auto;
-    }
-    .build-card {
-      background: rgba(255,255,255,0.05);
-      border-radius:8px;
-      padding:8px;
-      width:140px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      cursor:pointer;
-      position:relative;
-      font-size:11px;
-      gap:6px;
-    }
-    .build-card .title {
-      font-weight:600;
-      width:100%;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .build-card .avatar {
-      width:60px;
-      height:60px;
-      border-radius:50%;
-      overflow:hidden;
-      background:#111;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .build-card .avatar img {
-      width:100%;
-      height:100%;
-      object-fit:contain;
-    }
-    .slots-preview {
-      display:flex;
-      gap:4px;
-      flex-wrap:wrap;
-      justify-content:center;
-      width:100%;
-    }
-    .slot-thumb {
-      width:16px;
-      height:16px;
-      border-radius:3px;
-      background-size:cover;
-      background-position:center;
-      flex:0 0 auto;
-    }
-    .no-builds {
-      width:100%;
-      padding:8px;
-      text-align:center;
-    }
+  .character-panel {
+    background: var(--panel);
+    border-radius:12px;
+    padding:18px 22px;
+    display:flex;
+    gap:24px;
+    position:relative;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .hero-preview {
+    position:relative;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background: linear-gradient(135deg,var(--neon2),var(--neon1));
+    padding:6px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hero-inner {
+    background:#1b1f57;
+    border-radius:50%;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .hero-inner img {
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .hero-info {
+    flex:1;
+    min-width:220px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .hero-info h2 {
+    margin:0;
+    font-size:1.5rem;
+    letter-spacing:1px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+  .badge-row {
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .badge {
+    background: rgba(255,255,255,0.05);
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:1px solid rgba(255,255,255,0.12);
+    pointer-events: none;
+  }
 
-    .builder-area {
-      flex:1;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-      padding:0;
-      margin-top:10px;
-      position:relative;
-    }
-    .build-container {
-      position:relative;
-      display:grid;
-      gap: var(--gap);
-      background: rgba(255,255,255,0.03);
-      padding:28px 30px 40px;
-      border-radius:14px;
-      box-shadow: var(--shadow);
-      width:100%;
-      max-width:1200px;
-      grid-template-columns: minmax(140px, 1fr) 220px 260px 160px;
-      grid-template-rows:
-        auto
-        auto
-        auto
-        auto;
-      grid-template-areas:
-        "hero hero hero hero"
-        "label-starmarks label-artifacts label-artifacts label-moon"
-        "starmarks artifacts artifacts moonbadges"
-        "starmarks artifacts artifacts moonbadges"
-        "actions actions actions actions";
-      align-items:start;
-      overflow: hidden;
-      transform: scale(var(--builder-scale));
-    }
-    .builder-character {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      height: 90%;
-      background-position: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-      opacity: 0.18;
-      z-index: 0;
-      transition: opacity .3s;
-    }
-    .hero-slot {
-      grid-area: hero;
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:12px;
-      padding:12px 16px;
-      background: rgba(255,255,255,0.04);
-      border-radius:10px;
-      position:relative;
-      width:100%;
-      max-width:250px;
-      z-index:1;
-    }
-    .hero-preview {
-      position:relative;
-      width:100px;
-      height:100px;
-      border-radius:50%;
-      overflow:hidden;
-      background: #111;
-      flex:0 0 auto;
-      border:3px solid gold;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-    .hero-preview img {
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      filter: none;
-    }
-    .hero-info {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width:0;
-    }
-    .hero-label {
-      font-size:.65rem;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin:0;
-      font-weight:600;
-      color:#fff;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .hero-selection {
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .hero-select {
-      padding:8px 16px;
-      background: var(--accent);
-      border:none;
-      border-radius:6px;
-      color:#fff;
-      cursor:pointer;
-      font-weight:600;
-      text-transform:uppercase;
-      transition:transform .15s, filter .2s;
-      flex:0 0 auto;
-    }
-    .hero-select:active { transform: scale(.95); }
-    .hero-select:hover { filter: brightness(1.05); }
-    .hero-background {
-      position:absolute;
-      inset:0;
-      z-index:-1;
-      background-size:contain;
-      background-position:center;
-      background-repeat:no-repeat;
-      opacity:.08;
-    }
+  .sidebar {
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .group {
+    background: var(--panel);
+    padding:14px 16px;
+    border-radius:10px;
+    border: var(--border);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    box-shadow: var(--shadow);
+  }
+  .group h4 {
+    margin:0;
+    font-size:0.85rem;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .slot-grid {
+    display:grid;
+    gap:10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .slot {
+    position:relative;
+    background: rgba(255,255,255,0.02);
+    border-radius:8px;
+    min-height:100px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:2px solid rgba(255,255,255,0.08);
+    transition: all var(--transition);
+  }
+  .slot.empty::after {
+    content:'+';
+    position:absolute;
+    font-size:28px;
+    color:rgba(255,255,255,0.35);
+    pointer-events:none;
+  }
+  .slot.filled {
+    box-shadow:0 0 22px var(--neon1),0 0 44px var(--neon2);
+    border-color: var(--neon1);
+    background-size:contain;
+    background-position:center;
+    background-repeat:no-repeat;
+  }
+  .slot img {
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    pointer-events:none;
+    display:block;
+  }
 
-    .group-label {
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      font-size:1rem;
-      color: var(--label-color);
-      display:inline-block;
-      margin-bottom:6px;
-      transform: translate(var(--label-offset-x), var(--label-offset-y));
-    }
-    .label-starmarks { grid-area: label-starmarks; justify-self:center; }
-    .label-artifacts { grid-area: label-artifacts; justify-self:center; }
-    .label-moon { grid-area: label-moon; justify-self:center; }
+  .side {
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .card {
+    background: var(--panel);
+    padding:16px 18px;
+    border-radius:10px;
+    border: var(--border);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    margin:0;
+    font-size:1rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .actions {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .btn {
+    padding:12px 16px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing:1px;
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background: linear-gradient(135deg,var(--neon1),var(--neon2));
+    color:#000;
+    transition:filter var(--transition), transform .15s;
+    box-shadow: 0 0 30px rgba(0,255,231,0.6);
+  }
+  .btn.secondary {
+    background:transparent;
+    border:2px solid var(--neon1);
+    color: var(--neon1);
+    box-shadow: 0 0 18px rgba(0,255,231,0.35);
+  }
+  .btn:hover { filter:brightness(1.1); }
+  .btn:active { transform:scale(.95); }
 
-    .starmarks {
-      grid-area: starmarks;
-      display:grid;
-      grid-template-columns: repeat(2, var(--slot-small));
-      grid-template-rows: repeat(2, var(--slot-small));
-      gap:14px;
-      position:relative;
-      justify-content:center;
-    }
-    .artifacts {
-      grid-area: artifacts;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      position:relative;
-      min-width: var(--slot-big);
-      min-height: var(--slot-big);
-    }
-    .moonbadges {
-      grid-area: moonbadges;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-      justify-content:flex-start;
-      align-items:center;
-    }
-    .moon-circle {
-      position:relative;
-      width: var(--slot-small);
-      height: var(--slot-small);
-      border-radius:50%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+  .search {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .search input {
+    flex:1;
+    padding:10px 12px;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+    outline:none;
+    min-width:120px;
+  }
+  .build-list {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:260px;
+    overflow:auto;
+  }
+  .build-item {
+    background: rgba(255,255,255,0.03);
+    padding:10px 12px;
+    border-radius:6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    font-size:0.9rem;
+    transition:background var(--transition);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .build-item:hover { background: rgba(255,255,255,0.05); }
 
-    .slot {
-      position:relative;
-      background: rgba(255,255,255,0.02) center/cover no-repeat;
-      cursor:pointer;
-      border-radius:8px;
-      transition: box-shadow var(--transition), transform .15s;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      overflow:hidden;
-      width: var(--slot-small);
-      height: var(--slot-small);
-      flex: 0 0 auto;
-      min-width:0;
-    }
-    .slot .plus {
-      position:absolute;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      inset:0;
-      font-size:32px;
-      color: rgba(255,255,255,0.75);
-      pointer-events:none;
-      user-select:none;
-    }
-    .slot.filled .plus { display:none; }
-    .slot:hover { filter: brightness(1.08); }
-    .slot:active { transform: scale(.95); }
+  .overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(15,16,48,0.95);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    z-index:1000;
+  }
+  .picker {
+    background: #1f2145;
+    width:100%;
+    max-width:900px;
+    border-radius:14px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border: var(--border);
+    box-shadow: 0 0 120px rgba(165,108,255,0.3);
+  }
+  .picker-header {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:14px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .picker-header .title {
+    flex:1;
+    margin:0;
+    font-size:1.2rem;
+    font-weight:700;
+  }
+  .close-btn {
+    background:transparent;
+    border:none;
+    font-size:1.2rem;
+    color:#fff;
+    cursor:pointer;
+    padding:6px;
+    border-radius:6px;
+    transition:background var(--transition);
+  }
+  .close-btn:hover { background:rgba(255,255,255,0.08); }
+  .picker-body {
+    padding:14px;
+    display:grid;
+    gap:12px;
+    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+    max-height:65vh;
+    overflow:auto;
+  }
+  .picker-card {
+    background: rgba(255,255,255,0.02);
+    border-radius:8px;
+    padding:8px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100px;
+    position:relative;
+    transition:transform var(--transition), box-shadow .25s ease;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .picker-card:hover {
+    transform:translateY(-2px);
+    box-shadow:0 0 24px var(--neon1);
+  }
+  .picker-card img {
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:4px;
+    display:block;
+  }
+  .loading {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    padding:30px 0;
+  }
 
-    .slot[data-category="Starmarks"] {
-      box-shadow: 0 0 14px gold, 0 0 28px gold;
-      border:3px solid gold;
-    }
-    .slot[data-category="Artifacts"] {
-      box-shadow: 0 0 14px red, 0 0 28px red;
-      border:3px solid red;
-      border-radius:50%;
-      width: var(--slot-big);
-      height: var(--slot-big);
-    }
-    .slot[data-category="MoonBadges"] {
-      box-shadow: 0 0 14px #ccc, 0 0 28px #ccc;
-      border:3px solid rgba(255,255,255,.6);
-      border-radius:50%;
-      width: var(--slot-small);
-      height: var(--slot-small);
-    }
+  #toast {
+    position:fixed;
+    top:14px;
+    left:50%;
+    transform:translateX(-50%);
+    background: rgba(20,20,80,0.95);
+    padding:14px 18px;
+    border-radius:8px;
+    font-size:13px;
+    display:flex;
+    gap:10px;
+    z-index:1500;
+    color:#fff;
+    box-shadow:0 0 60px rgba(165,108,255,0.5);
+  }
 
-    .actions {
-      grid-area: actions;
-      display:flex;
-      gap:16px;
-      margin-top:20px;
-      flex-wrap:wrap;
-    }
-    .actions button {
-      flex:1;
-      min-width:200px;
-      padding:16px 12px;
-      background: var(--accent);
-      border:none;
-      border-radius:8px;
-      color:#fff;
-      font-weight:600;
-      cursor:pointer;
-      transition:transform .15s, filter .2s;
-    }
-    .actions button:active { transform: scale(.95); }
-    .actions button:hover { filter: brightness(1.05); }
+  #devToggle {
+    position:fixed;
+    top:14px;
+    right:14px;
+    background: transparent;
+    border:2px solid var(--neon2);
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    color: var(--text);
+    font-weight:600;
+    z-index:2000;
+    backdrop-filter:blur(6px);
+  }
+  #devPanel {
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background: rgba(31,33,75,0.95);
+    border-radius:12px;
+    padding:18px 22px;
+    width:420px;
+    max-width:95vw;
+    display:none;
+    flex-direction:column;
+    gap:12px;
+    border: var(--border);
+    box-shadow:0 0 100px rgba(165,108,255,0.6);
+    z-index:2000;
+  }
+  #devPanel h4 { margin:0; font-size:1rem; letter-spacing:1px; }
+  .dev-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .dev-input { flex:1; padding:8px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; }
+  .builds-checkboxes { max-height:160px; overflow:auto; background: rgba(255,255,255,0.02); padding:8px; border-radius:6px; }
+  .small { font-size:12px; opacity:.8; }
 
-    /* Picker Overlay (Icons / Characters) */
-    #iconPicker, #charPicker {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.85);
-      z-index:90;
-      align-items:flex-start;
-      justify-content:center;
-      padding:80px 14px 14px;
-      overflow:hidden;
-    }
-    .picker-panel {
-      background: var(--picker-bg);
-      padding:0;
-      border-radius:10px;
-      max-width:1000px;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      box-shadow:0 20px 60px rgba(0,0,0,0.7);
-    }
-    .picker-header {
-      position:sticky;
-      top:0;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-      background: rgba(0,0,0,0.9);
-      z-index:2;
-    }
-    .picker-header .title {
-      font-size:1.2rem;
-      font-weight:600;
-      flex:1;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      background: rgba(0,0,0,0);
-      padding:4px 8px;
-      border-radius:4px;
-    }
-    .close-btn {
-      background: transparent;
-      border:none;
-      color:#fff;
-      cursor:pointer;
-      font-size:1.2rem;
-      padding:6px 10px;
-      border-radius:6px;
-      transition:background .2s;
-    }
-    .close-btn:hover { background: rgba(255,255,255,0.08); }
+  .build-loading-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1800;
+    color:#fff;
+    font-size:16px;
+    flex-direction:column;
+    gap:12px;
+  }
+  .build-loading-overlay .spinner {
+    width:40px;
+    height:40px;
+    border:5px solid rgba(255,255,255,0.2);
+    border-top-color: var(--neon1);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
 
-    #charItems, #iconItems {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
-      grid-auto-rows: 160px;
-      gap:12px;
-      padding:12px;
-      max-height:65vh;
-      overflow:auto;
-      position:relative;
-      z-index:1;
-    }
-    .picker-item {
-      background: rgba(255,255,255,0.03);
-      border-radius:8px;
-      position:relative;
-      cursor:pointer;
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:6px;
-      transition: transform .15s, box-shadow .2s;
-      width:100%;
-      height:100%;
-      min-width:0;
-      will-change: transform;
-    }
-    .picker-item:hover { transform: scale(1.02); }
-    .picker-item:active { transform: scale(.98); }
-    .picker-item img {
-      max-width:100%;
-      max-height:100%;
-      object-fit:contain;
-      border-radius:4px;
-      display:block;
-    }
-    .picker-loading {
-      padding:40px;
-      width:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      font-size:14px;
-      gap:12px;
-    }
-    .spinner {
-      width:18px;
-      height:18px;
-      border:3px solid rgba(255,255,255,0.2);
-      border-top-color: #ff4c4c;
-      border-radius:50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #charItems::-webkit-scrollbar,
-    #iconItems::-webkit-scrollbar,
-    #searchResults::-webkit-scrollbar {
-      width:10px;
-    }
-    #charItems::-webkit-scrollbar-track,
-    #iconItems::-webkit-scrollbar-track,
-    #searchResults::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.02);
-      border-radius:6px;
-    }
-    #charItems::-webkit-scrollbar-thumb,
-    #iconItems::-webkit-scrollbar-thumb,
-    #searchResults::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.15);
-      border-radius:6px;
-    }
-
-    @media (max-width: 1200px) {
-      .build-container {
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-areas:
-          "hero hero hero"
-          "label-starmarks label-artifacts label-moon"
-          "starmarks artifacts moonbadges"
-          "starmarks artifacts moonbadges"
-          "actions actions actions";
-      }
-      .moonbadges { align-items:flex-start; }
-    }
-    @media (max-width: 900px) {
-      .build-container {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-          "hero"
-          "label-starmarks"
-          "starmarks"
-          "label-artifacts"
-          "artifacts"
-          "label-moon"
-          "moonbadges"
-          "actions";
-      }
-      .starmarks { justify-content:center; }
-      .artifacts { justify-content:center; }
-      .moonbadges { flex-direction:row; gap:12px; }
-    }
-  </style>
+  @media (max-width:1250px){
+    .container { grid-template-columns:1fr; }
+    .sidebar, .side { order:2; }
+  }
+  @media (max-width:950px){
+    .character-panel { flex-direction:column; align-items:center; }
+    .container { grid-template-columns:1fr; }
+  }
+</style>
 </head>
 <body>
-  <main>
-    <div class="search-bar">
-      <input id="searchInput" placeholder="Build-Namen…" oninput="searchBuild()" />
-      <button onclick="searchBuild()">Suchen</button>
-    </div>
-    <div id="searchResults"></div>
 
-    <div class="builder-area">
-      <div class="build-container">
-        <div class="builder-character" id="builderCharacterBg"></div>
-
-        <div class="hero-slot">
-          <div class="hero-preview" id="heroDisplay">
-            <div style="font-size:12px;opacity:.7;" id="noCharText">Keine</div>
-          </div>
-          <div class="hero-info">
-            <div class="hero-label">Charakter</div>
-            <div class="hero-selection">
-              <button class="hero-select" onclick="openCharacterPicker()">Charakter wählen</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="group-label label-starmarks">Starmarks</div>
-        <div class="group-label label-artifacts">Artifacts</div>
-        <div class="group-label label-moon">Moonbadges</div>
-
-        <div class="starmarks">
-          <div class="slot" data-slot="sq1" data-category="Starmarks"><div class="plus">+</div></div>
-          <div class="slot" data-slot="sq3" data-category="Starmarks"><div class="plus">+</div></div>
-          <div class="slot" data-slot="sq5" data-category="Starmarks"><div class="plus">+</div></div>
-          <div class="slot" data-slot="sq6" data-category="Starmarks"><div class="plus">+</div></div>
-        </div>
-
-        <div class="artifacts">
-          <div class="slot" data-slot="ct" data-category="Artifacts"><div class="plus">+</div></div>
-        </div>
-
-        <div class="moonbadges">
-          <div class="moon-circle">
-            <div class="slot" data-slot="sq2" data-category="MoonBadges"><div class="plus">+</div></div>
-          </div>
-          <div class="moon-circle">
-            <div class="slot" data-slot="sq4" data-category="MoonBadges"><div class="plus">+</div></div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button onclick="saveBuild()">Speichern</button>
-          <button onclick="generateLink()">Link kopieren</button>
+  <!-- Charakter oben -->
+  <div class="top-character">
+    <div class="character-panel">
+      <div class="hero-preview">
+        <div class="hero-inner" id="heroDisplay">
+          <div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>
         </div>
       </div>
-    </div>
-  </main>
-
-  <div id="charPicker">
-    <div class="picker-panel">
-      <div class="picker-header">
-        <div class="title">Charakter wählen</div>
-        <button class="close-btn" onclick="closeCharacterPicker()">✕</button>
+      <div class="hero-info">
+        <h2>Charakter: <span id="charName" style="font-size:1rem;font-weight:500;color:#aaa;">(wählen)</span></h2>
+        <div class="hero-actions">
+          <button class="btn" id="chooseCharacter">Charakter wählen</button>
+          <button class="btn secondary" id="clearCharacter">Zurücksetzen</button>
+        </div>
+        <div class="badge-row">
+          <div class="badge">Starmarks: <span id="count-starmarks">0</span></div>
+          <div class="badge">Artifacts: <span id="count-artifacts">0</span></div>
+          <div class="badge">Moonbadges: <span id="count-moon">0</span></div>
+        </div>
       </div>
-      <div id="charItems"></div>
     </div>
   </div>
 
-  <div id="iconPicker">
-    <div class="picker-panel">
+  <!-- Hauptbereich -->
+  <div class="container">
+    <!-- Slots links -->
+    <div class="sidebar">
+      <div class="group" aria-label="Starmarks">
+        <h4>Starmarks</h4>
+        <div class="slot-grid">
+          <div class="slot empty" data-slot="sq1" data-category="Starmarks"></div>
+          <div class="slot empty" data-slot="sq3" data-category="Starmarks"></div>
+          <div class="slot empty" data-slot="sq5" data-category="Starmarks"></div>
+          <div class="slot empty" data-slot="sq6" data-category="Starmarks"></div>
+        </div>
+      </div>
+      <div class="group" aria-label="Artifacts">
+        <h4>Artifacts</h4>
+        <div class="slot-grid">
+          <div class="slot empty" data-slot="ct" data-category="Artifacts"></div>
+        </div>
+      </div>
+      <div class="group" aria-label="Moonbadges">
+        <h4>Moonbadges</h4>
+        <div class="slot-grid">
+          <div class="slot empty" data-slot="sq2" data-category="MoonBadges"></div>
+          <div class="slot empty" data-slot="sq4" data-category="MoonBadges"></div>
+        </div>
+      </div>
+      <div class="group" aria-label="Rüstung">
+        <h4>Rüstung</h4>
+        <div class="slot-grid">
+          <div class="slot empty" data-slot="armor1" data-category="Armor"></div>
+          <div class="slot empty" data-slot="armor2" data-category="Armor"></div>
+          <div class="slot empty" data-slot="armor3" data-category="Armor"></div>
+          <div class="slot empty" data-slot="armor4" data-category="Armor"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aktionen & Suche rechts -->
+    <div class="side">
+      <div class="card">
+        <h3>Aktionen</h3>
+        <div class="actions">
+          <button class="btn" id="saveBuildBtn">Speichern</button>
+          <button class="btn" id="copyLinkBtn">Link kopieren</button>
+          <button class="btn secondary" id="resetAllBtn">Zurücksetzen</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Builds &amp; Suche</h3>
+        <div class="search">
+          <input id="searchInput" placeholder="Build suchen..." />
+          <button class="btn secondary" id="searchBtn">Suchen</button>
+        </div>
+        <div class="build-list" id="buildList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Picker Overlay -->
+  <div class="overlay" id="pickerOverlay">
+    <div class="picker" role="dialog" aria-label="Picker">
       <div class="picker-header">
-        <div class="title">Icon wählen</div>
+        <div class="title" id="pickerTitle">Auswahl</div>
         <button class="close-btn" onclick="closePicker()">✕</button>
       </div>
-      <div id="iconItems"></div>
+      <div class="picker-body" id="pickerBody">
+        <div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2); border-top-color: var(--neon1); border-radius:50%; width:18px; height:18px; margin-right:8px;"></div><div>Lade...</div></div>
+      </div>
     </div>
   </div>
 
-  <button id="devToggle" style="position:fixed;top:12px;right:12px;background:#111;border:2px solid #ff4c4c;padding:8px 14px;color:#fff;border-radius:6px;cursor:pointer;z-index:999;font-size:0.85rem;backdrop-filter:blur(4px);">Dev</button>
-  <div id="devPanel" aria-label="Dev Panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); padding:16px 18px; border-radius:10px; width:340px; max-width:90vw; box-shadow:0 0 24px rgba(255,76,76,.7); z-index:1000; color:#fff; font-size:13px; gap:8px; font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
-    <button id="devClose" style="position:absolute; top:6px; right:6px; background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
-    <h4 style="margin:0 0 6px; font-size:1rem; letter-spacing:1px;">Developer Panel</h4>
+  <!-- Toast -->
+  <div id="toast" style="display:none;"></div>
 
-    <div id="delete-build-section" style="margin-top:12px; display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-      <div style="font-size:0.9rem; font-weight:600;">Builds löschen (Komma-getrennt oder Haken wählen):</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;">
-        <input id="deleteBuildInput" placeholder="z.B. TestBuild1,TestBuild2" style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#111; color:#fff; min-width:180px;" />
-        <button id="refreshBuildsForDelete" style="padding:8px 12px; background:#444; border:none; border-radius:6px; cursor:pointer; color:#fff;">Liste laden</button>
-        <button id="deleteBuildsBtn" style="padding:8px 12px; background:var(--accent); border:none; border-radius:6px; cursor:pointer; color:#fff;">Löschen</button>
+  <!-- Dev Panel -->
+  <button id="devToggle">Dev</button>
+  <div id="devPanel" aria-label="Developer Panel">
+    <h4>Developer Panel</h4>
+    <div class="dev-row">
+      <div style="flex:1">
+        <div class="small">Builds laden / auswählen zum Löschen:</div>
+        <div class="builds-checkboxes" id="devBuildsList">Lade...</div>
       </div>
-      <div id="availableBuildsList" style="max-height:220px; overflow:auto; background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; font-size:12px;">
-        <div style="opacity:.6;">Klicke "Liste laden", um aktuelle Builds zu sehen.</div>
-      </div>
-      <div id="deleteStatus" style="font-size:12px; margin-top:4px;"></div>
     </div>
+    <div class="dev-row">
+      <input id="manualDeleteInput" class="dev-input" placeholder="Build-Namen kommasepariert" />
+    </div>
+    <div class="dev-row" style="gap:6px;">
+      <button class="btn secondary" id="refreshBuildsDev">Aktualisieren</button>
+      <button class="btn" id="deleteSelectedBuilds">Löschen</button>
+    </div>
+    <div id="devStatus" class="small"></div>
+    <button class="btn secondary" id="closeDev">Schließen</button>
   </div>
+
+  <!-- Lade Overlay -->
+  <div class="build-loading-overlay" id="buildLoadingOverlay">
+    <div class="spinner"></div>
+    <div id="buildLoadingText">Lade Build…</div>
+  </div>
+
+  <!-- Sounds (Platzhalter) -->
+  <audio id="clickSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
+  <audio id="popSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
 
   <script>
-    const REPO   = 'Reso1992/RpXBuilder';
+    const REPO = 'Reso1992/RpXBuilder';
     const BRANCH = 'main';
-    let activeSlot = null;
     let selectedCharacter = null;
 
     const categoryFolderMap = {
-      Starmarks:  'Starmarks',
-      Artifacts:  'Artifacts',
+      Starmarks: 'Starmarks',
+      Artifacts: 'Artifacts',
       MoonBadges: 'Moonbadges',
+      Armor: 'Armor', // neuer Ordner für Rüstung (anpassen falls anders)
       Characters: 'Characters'
     };
 
-    function showLoading(container, text) {
-      container.innerHTML = '';
-      const loading = document.createElement('div');
-      loading.className = 'picker-loading';
-      loading.innerHTML = `<div class="spinner" aria-hidden="true"></div><div>${text}</div>`;
-      container.appendChild(loading);
+    // Toast
+    const toastEl = document.getElementById('toast');
+    function showToast(msg, d=1800){
+      toastEl.textContent = msg;
+      toastEl.style.display='flex';
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(()=> toastEl.style.display='none', d);
+    }
+    function playSfx(id){ const a=document.getElementById(id); if(a){ a.currentTime=0; a.play().catch(()=>{}); } }
+
+    async function fetchFolder(folder){
+      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
+      if(!res.ok) throw new Error(`Fetch fehlgeschlagen (${res.status})`);
+      return res.json();
     }
 
-    function initSlotClicks() {
-      document.querySelectorAll('.slot').forEach(slot => {
-        if (slot.__bound) slot.removeEventListener('click', slot.__bound);
-        const handler = async () => {
-          activeSlot = slot;
-          const cat = slot.dataset.category;
-          const folder = categoryFolderMap[cat];
-          const container = document.getElementById('iconItems');
-          if (!container) return;
-          container.innerHTML = '';
-          showLoading(container, 'Icons laden…');
-          try {
-            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
-            if (!res.ok) throw new Error('Ordner nicht gefunden');
-            const files = await res.json();
-            container.innerHTML = '';
-            if (!files.length) {
-              container.innerHTML = '<div style="color:#f55; padding:12px;">Keine Icons.</div>';
-            } else {
-              files.forEach(f => {
-                if (f.type === 'file') {
-                  const item = document.createElement('div');
-                  item.classList.add('picker-item');
-                  const img = document.createElement('img');
-                  img.loading = 'lazy';
-                  img.src = f.download_url;
-                  img.title = f.name;
-                  item.appendChild(img);
-                  item.onclick = () => {
-                    slot.style.backgroundImage = `url(${f.download_url})`;
-                    slot.classList.add('filled');
-                    slot.dataset.url = f.download_url;
-                    closePicker();
-                  };
-                  container.appendChild(item);
-                }
-              });
-            }
-          } catch (e) {
-            container.innerHTML = `<div style="color:#f55; padding:12px;">Fehler beim Laden</div>`;
-            console.error(e);
-          }
-          document.getElementById('iconPicker').style.display = 'flex';
-        };
-        slot.__bound = handler;
-        slot.addEventListener('click', handler);
+    function openPicker(title, fetcher, onSelect){
+      document.getElementById('pickerTitle').textContent=title;
+      const body = document.getElementById('pickerBody');
+      body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2); border-top-color: var(--neon1); border-radius:50%; width:18px; height:18px; margin-right:8px;"></div><div>Lade...</div></div>';
+      document.getElementById('pickerOverlay').style.display='flex';
+      fetcher().then(files=>{
+        body.innerHTML='';
+        if(!files || !files.length){
+          body.innerHTML='<div style="padding:16px;color:#f55;">Keine Einträge.</div>';
+          return;
+        }
+        files.forEach(f=>{
+          if(f.type!=='file') return;
+          const card=document.createElement('div');
+          card.className='picker-card';
+          const img=document.createElement('img');
+          img.src = f.download_url;
+          img.alt = f.name;
+          img.loading='lazy';
+          img.onerror=()=>{ img.style.filter='grayscale(100%)'; img.style.opacity='.5'; };
+          card.appendChild(img);
+          card.onclick=()=>{
+            onSelect(f);
+            playSfx('popSound');
+            closePicker();
+          };
+          body.appendChild(card);
+        });
+      }).catch(e=>{
+        body.innerHTML='<div style="padding:16px;color:#f55;">Fehler beim Laden.</div>';
+        console.error('Picker fetch error:', e);
       });
     }
+    function closePicker(){ document.getElementById('pickerOverlay').style.display='none'; }
 
-    function closePicker() {
-      document.getElementById('iconPicker').style.display = 'none';
+    function updateBadgeCounts(){
+      document.getElementById('count-starmarks').textContent = document.querySelectorAll('.slot[data-category="Starmarks"].filled').length;
+      document.getElementById('count-artifacts').textContent = document.querySelectorAll('.slot[data-category="Artifacts"].filled').length;
+      document.getElementById('count-moon').textContent = document.querySelectorAll('.slot[data-category="MoonBadges"].filled').length;
     }
 
-    async function openCharacterPicker() {
-      const container = document.getElementById('charItems');
-      if (!container) return;
-      container.innerHTML = '';
-      showLoading(container, 'Charaktere laden…');
-      try {
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/Characters?ref=${BRANCH}`);
-        if (!res.ok) throw new Error('Characters nicht erreichbar');
-        const files = await res.json();
-        container.innerHTML = '';
-        if (!files.length) {
-          container.innerHTML = '<div style="color:#f55; padding:12px;">Keine Charaktere.</div>';
-        } else {
-          files.forEach(f => {
-            if (f.type === 'file') {
-              const item = document.createElement('div');
-              item.classList.add('picker-item');
-              const img = document.createElement('img');
-              img.loading = 'lazy';
-              img.src = f.download_url;
-              img.title = f.name;
-              item.appendChild(img);
-              item.onclick = () => {
-                selectedCharacter = f;
-                updateHero(f);
-                closeCharacterPicker();
-              };
-              container.appendChild(item);
+    function setCharacter(f){
+      selectedCharacter = f;
+      document.getElementById('charName').textContent = f.name.replace(/\.[^/.]+$/, '');
+      const hero = document.getElementById('heroDisplay');
+      hero.innerHTML='';
+      const img=document.createElement('img');
+      img.src=f.download_url;
+      img.alt=f.name;
+      img.loading='lazy';
+      hero.appendChild(img);
+    }
+
+    // Slot Handler allgemein
+    function handleSlotClick(s){
+      openPicker('Icon wählen', async ()=>{
+        try {
+          return await fetchFolder(categoryFolderMap[s.dataset.category]);
+        } catch(e){
+          console.error(`Fehler beim Laden von Icons für "${s.dataset.category}":`, e);
+          throw new Error('Icons konnten nicht geladen werden.');
+        }
+      }, f=>{
+        s.classList.remove('empty');
+        s.classList.add('filled');
+        s.style.backgroundImage = `url(${f.download_url})`;
+        s.dataset.url = f.download_url;
+        updateBadgeCounts();
+        showToast('Slot gesetzt');
+        playSfx('clickSound');
+      });
+    }
+    document.querySelectorAll('.slot').forEach(s=>{
+      s.addEventListener('click', ()=> handleSlotClick(s));
+    });
+
+    // Charakter wählen
+    document.getElementById('chooseCharacter').addEventListener('click', ()=>{
+      openPicker('Charakter wählen', async ()=>{
+        try {
+          return await fetchFolder('Characters');
+        } catch(e){
+          console.error('Fehler beim Laden der Charaktere:', e);
+          throw new Error('Charaktere konnten nicht geladen werden.');
+        }
+      }, f=>{
+        setCharacter(f);
+        showToast('Charakter gesetzt');
+      });
+    });
+    document.getElementById('clearCharacter').addEventListener('click', ()=>{
+      selectedCharacter=null;
+      document.getElementById('charName').textContent='(wählen)';
+      document.getElementById('heroDisplay').innerHTML='<div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>';
+      showToast('Charakter entfernt');
+    });
+
+    // Builds laden / suchen
+    async function loadBuilds(filter=''){
+      const list = document.getElementById('buildList');
+      list.innerHTML = '<div style="padding:8px;opacity:.7;">Lade Builds…</div>';
+      let builds = null;
+      for (let attempt=1; attempt<=3; attempt++){
+        try {
+          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+          if (!r.ok){
+            const text=await r.text();
+            throw new Error(`HTTP ${r.status}: ${text.slice(0,200)}`);
+          }
+          builds = await r.json();
+          break;
+        } catch(err){
+          console.warn(`loadBuilds Versuch ${attempt} fehlgeschlagen:`, err);
+          if (attempt===3){
+            list.innerHTML = `<div style="padding:8px;color:#f55;">Fehler beim Laden der Builds: ${err.message}</div>`;
+            return;
+          }
+          await new Promise(r=>setTimeout(r, 300 * attempt));
+        }
+      }
+      list.innerHTML='';
+      const entries = Object.entries(builds || {});
+      let found=false;
+      entries.forEach(([name,data])=>{
+        if (filter && !name.toLowerCase().includes(filter.toLowerCase())) return;
+        found=true;
+        const item=document.createElement('div');
+        item.className='build-item';
+        item.innerHTML = `<div><strong>${name}</strong></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            ${data.character?`<div style="width:24px;height:24px;border-radius:50%;overflow:hidden;border:1px solid var(--neon1);"><img src="${data.character}" style="width:100%;height:100%;object-fit:contain;"></div>`:''}
+            ${Object.values(data.slots||{}).filter(u=>u).slice(0,4).map(u=>`<div style="width:14px;height:14px;border-radius:3px;background-size:cover;background-position:center;background-image:url('${u}')"></div>`).join('')}
+          </div>`;
+        item.addEventListener('click', async ()=>{
+          const overlay=document.getElementById('buildLoadingOverlay');
+          document.getElementById('buildLoadingText').textContent=`Lade Build "${name}"…`;
+          overlay.style.display='flex';
+          try {
+            await new Promise(r=>setTimeout(r, 150));
+            document.querySelectorAll('.slot').forEach(s=>{
+              const url = data.slots?.[s.dataset.slot]||'';
+              if (url){
+                s.style.backgroundImage=`url(${url})`;
+                s.classList.add('filled');
+                s.dataset.url=url;
+                s.classList.remove('empty');
+              } else {
+                s.style.backgroundImage='';
+                s.classList.remove('filled');
+                delete s.dataset.url;
+                s.classList.add('empty');
+              }
+            });
+            if (data.character){
+              setCharacter({download_url:data.character,name:'geladen'});
             }
-          });
-        }
-      } catch (e) {
-        container.innerHTML = `<div style="color:#f55; padding:12px;">Fehler beim Laden</div>`;
-        console.error(e);
-      }
-      document.getElementById('charPicker').style.display = 'flex';
-    }
-    function closeCharacterPicker() {
-      document.getElementById('charPicker').style.display = 'none';
-    }
-
-    function updateHero(f) {
-      const disp = document.getElementById('heroDisplay');
-      const noText = document.getElementById('noCharText');
-      if (noText) noText.style.display = 'none';
-      disp.innerHTML = '';
-      const img = document.createElement('img');
-      img.src = f.download_url;
-      img.alt = f.name;
-      disp.appendChild(img);
-
-      const heroSlot = disp.closest('.hero-slot');
-      if (heroSlot) {
-        let bg = heroSlot.querySelector('.hero-background');
-        if (!bg) {
-          bg = document.createElement('div');
-          bg.className = 'hero-background';
-          heroSlot.appendChild(bg);
-        }
-        bg.style.backgroundImage = `url(${f.download_url})`;
-      }
-
-      const container = document.querySelector('.build-container');
-      let big = container.querySelector('.builder-character');
-      if (!big) {
-        big = document.createElement('div');
-        big.className = 'builder-character';
-        container.prepend(big);
-      }
-      big.style.backgroundImage = `url(${f.download_url})`;
-      big.style.opacity = '0.18';
-    }
-
-    // Toast helper
-    function showToast(message, duration = 3000) {
-      const id = 'global-toast';
-      let el = document.getElementById(id);
-      if (!el) {
-        el = document.createElement('div');
-        el.id = id;
-        Object.assign(el.style, {
-          position: 'fixed',
-          top: '12px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.85)',
-          padding: '12px 18px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          color: '#fff',
-          zIndex: 3000,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          minWidth: '180px',
-          boxShadow: '0 10px 40px rgba(255,76,76,0.3)'
+            updateBadgeCounts();
+            showToast(`Build "${name}" geladen`);
+          } finally {
+            overlay.style.display='none';
+          }
         });
-        document.body.appendChild(el);
+        list.appendChild(item);
+      });
+      if (!found){
+        list.innerHTML='<div style="padding:8px;opacity:.7;">Keine Builds gefunden.</div>';
       }
-      el.textContent = message;
-      el.style.opacity = '1';
-      clearTimeout(el._timeout);
-      el._timeout = setTimeout(() => {
-        el.style.transition = 'opacity .4s';
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 500);
-      }, duration);
     }
 
-    // saveBuild ohne localStorage, mit Polling & Feedback
-    let isSaving = false;
-    async function saveBuild() {
-      if (isSaving) return;
-      const name = prompt('Name für Deinen Build:');
+    document.getElementById('searchBtn').addEventListener('click', ()=> loadBuilds(document.getElementById('searchInput').value));
+    document.getElementById('searchInput').addEventListener('keyup', e=>{
+      if (e.key==='Enter') loadBuilds(e.target.value);
+    });
+
+    document.getElementById('saveBuildBtn').addEventListener('click', async ()=>{
+      const name = prompt('Name für Build:');
       if (!name) return;
-
-      const saveBtn = Array.from(document.querySelectorAll('.actions button')).find(b => b.textContent.toLowerCase().includes('speichern'));
-      const originalText = saveBtn ? saveBtn.textContent : '';
-      if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Speichern…';
-      }
-      isSaving = true;
-      showToast(`Speichere Build "${name}"… das kann 1–3 Sekunden dauern.`);
-
-      const slots = {};
-      document.querySelectorAll('.slot').forEach(s => {
+      showToast(`Speichere "${name}"…`);
+      const slots={};
+      document.querySelectorAll('.slot').forEach(s=>{
         slots[s.dataset.slot] = s.dataset.url || '';
       });
       const character = selectedCharacter ? selectedCharacter.download_url : '';
-      const payload = { name, slots, character };
-
       try {
-        // optionaler Name-Check zur Warnung
-        try {
-          const existingRes = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-          if (existingRes.ok) {
-            const existing = await existingRes.json();
-            if (existing[name]) {
-              const overwrite = confirm(`Ein Build mit dem Namen "${name}" existiert bereits. Überschreiben?`);
-              if (!overwrite) throw new Error('Abgebrochen vom Nutzer');
-            }
-          }
-        } catch (e) {
-          console.warn('Check vorhandener Builds fehlgeschlagen', e);
-        }
-
-        const res = await fetch('/.netlify/functions/saveBuilds', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        const res = await fetch('/.netlify/functions/saveBuilds',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({name, slots, character})
         });
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(txt || `Status ${res.status}`);
-        }
-
-        // Polling: prüfen, ob der Build sichtbar wird
-        let visible = false;
-        for (let i = 0; i < 3; i++) {
-          await new Promise(r => setTimeout(r, 600));
-          try {
-            const check = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-            if (check.ok) {
-              const builds = await check.json();
-              if (builds[name]) {
-                visible = true;
-                break;
-              }
-            }
-          } catch (_) {}
-        }
-
-        if (visible) {
-          showToast(`✅ Build "${name}" gespeichert.`, 2000);
-        } else {
-          showToast(`Build "${name}" gespeichert, erscheint gleich.`, 2500);
-        }
-      } catch (err) {
-        console.error('Speichern fehlgeschlagen:', err);
-        showToast(`Fehler beim Speichern: ${err.message}`, 4000);
-      } finally {
-        isSaving = false;
-        if (saveBtn) {
-          saveBtn.disabled = false;
-          if (originalText) saveBtn.textContent = originalText;
-        }
+        if (!res.ok) throw new Error('Speichern fehlgeschlagen');
+        showToast('✅ Gespeichert');
+        loadBuilds();
+      } catch(e){
+        console.error(e);
+        showToast('Fehler beim Speichern');
       }
-    }
+    });
 
-    // loadBuild nur remote
-    async function loadBuild(name) {
-      let data = null;
-      try {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-        if (r.ok) {
-          const builds = await r.json();
-          if (builds[name]) data = builds[name];
-        }
-      } catch (e) {
-        console.warn('Build laden fehlgeschlagen', e);
-      }
-      if (!data) return alert(`Build "${name}" nicht gefunden.`);
-
-      document.querySelectorAll('.slot').forEach(s => {
-        const url = data.slots?.[s.dataset.slot] || '';
-        if (url) {
-          s.style.backgroundImage = `url(${url})`;
-          s.classList.add('filled');
-          s.dataset.url = url;
-        } else {
-          s.style.backgroundImage = '';
-          s.classList.remove('filled');
-          delete s.dataset.url;
-        }
-      });
-
-      if (data.character) {
-        selectedCharacter = { download_url: data.character, name: 'LoadedChar' };
-        updateHero({ download_url: data.character, name: 'LoadedChar' });
-      } else {
-        selectedCharacter = null;
-        const disp = document.getElementById('heroDisplay');
-        if (disp) {
-          disp.innerHTML = '<div style="font-size:12px;opacity:.7;" id="noCharText">Keine</div>';
-        }
-        const bg = document.querySelector('.hero-background');
-        if (bg) bg.style.backgroundImage = '';
-      }
-    }
-
-    // Suche frisch remote, ohne localStorage
-    let searchTimeout = null;
-    async function searchBuild() {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(async () => {
-        const q = document.getElementById('searchInput').value.trim().toLowerCase();
-        const res = document.getElementById('searchResults');
-        res.innerHTML = '';
-        if (!q) return;
-
-        let builds = {};
-        try {
-          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-          if (!r.ok) throw new Error('builds.json nicht verfügbar');
-          builds = await r.json();
-        } catch (e) {
-          console.error('Fehler beim Laden der Builds:', e);
-          const errDiv = document.createElement('div');
-          errDiv.textContent = 'Fehler beim Laden der Builds.';
-          errDiv.style.color = '#f55';
-          res.appendChild(errDiv);
-          return;
-        }
-
-        let found = false;
-        Object.entries(builds).forEach(([name, data]) => {
-          if (name.toLowerCase().includes(q)) {
-            found = true;
-            const card = document.createElement('div');
-            card.classList.add('build-card');
-            card.onclick = () => loadBuild(name);
-
-            const title = document.createElement('div');
-            title.className = 'title';
-            title.textContent = name;
-            card.appendChild(title);
-
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            if (data.character) {
-              const img = document.createElement('img');
-              img.src = data.character;
-              img.alt = 'Char';
-              avatar.appendChild(img);
-            } else {
-              const placeholder = document.createElement('div');
-              placeholder.textContent = '–';
-              placeholder.style.color = '#888';
-              avatar.appendChild(placeholder);
-            }
-            card.appendChild(avatar);
-
-            const slotRow = document.createElement('div');
-            slotRow.className = 'slots-preview';
-            Object.keys(data.slots || {}).forEach(slotKey => {
-              const url = data.slots[slotKey];
-              if (url) {
-                const thumb = document.createElement('div');
-                thumb.className = 'slot-thumb';
-                thumb.style.backgroundImage = `url(${url})`;
-                slotRow.appendChild(thumb);
-              }
-            });
-            card.appendChild(slotRow);
-            res.appendChild(card);
-          }
-        });
-        if (!found) {
-          const none = document.createElement('div');
-          none.className = 'no-builds';
-          none.textContent = 'Keine Builds gefunden.';
-          res.appendChild(none);
-        }
-      }, 150);
-    }
-
-    function generateLink() {
-      const params = new URLSearchParams();
-      document.querySelectorAll('.slot').forEach(s => {
-        if (s.dataset.url) params.set(s.dataset.slot, s.dataset.url);
+    document.getElementById('copyLinkBtn').addEventListener('click', ()=>{
+      const params=new URLSearchParams();
+      document.querySelectorAll('.slot').forEach(s=>{
+        if (s.dataset.url) params.set(s.dataset.slot,s.dataset.url);
       });
       if (selectedCharacter) params.set('character', selectedCharacter.download_url);
-      navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`)
-        .then(() => alert('Link kopiert!'));
-    }
+      navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`);
+      showToast('Link kopiert');
+    });
 
-    // Dev delete builds helpers (frisch laden)
-    async function fetchBuildNames() {
-      try {
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/builds.json?ref=${BRANCH}`, {
-          headers: { Accept: 'application/vnd.github.v3.raw' }
-        });
-        if (!res.ok) throw new Error(`Fehler beim Laden: ${res.status}`);
-        const text = await res.text();
-        const builds = JSON.parse(text);
-        return Object.keys(builds);
-      } catch (e) {
-        console.error('Fehler beim Laden der Builds:', e);
-        return null;
-      }
-    }
-
-    function initDevDeleteBuildsUI() {
-      const refreshBtn = document.getElementById('refreshBuildsForDelete');
-      const deleteBtn = document.getElementById('deleteBuildsBtn');
-      const input = document.getElementById('deleteBuildInput');
-      const listContainer = document.getElementById('availableBuildsList');
-      const status = document.getElementById('deleteStatus');
-
-      async function loadList() {
-        listContainer.innerHTML = '<div class="picker-loading"><div class="spinner"></div><div>Lade Builds…</div></div>';
-        const names = await fetchBuildNames();
-        if (!names) {
-          listContainer.innerHTML = '<div style="color:#f55;">Fehler beim Laden der Builds.</div>';
-          return;
-        }
-        listContainer.innerHTML = '';
-        names.forEach(n => {
-          const row = document.createElement('div');
-          row.style.display = 'flex';
-          row.style.alignItems = 'center';
-          row.style.gap = '8px';
-          row.style.marginBottom = '4px';
-          const cb = document.createElement('input');
-          cb.type = 'checkbox';
-          cb.value = n;
-          cb.style.flex = '0 0 auto';
-          const label = document.createElement('span');
-          label.textContent = n;
-          label.style.flex = '1';
-          row.appendChild(cb);
-          row.appendChild(label);
-          listContainer.appendChild(row);
-        });
-      }
-
-      refreshBtn?.addEventListener('click', loadList);
-
-      deleteBtn?.addEventListener('click', async () => {
-        status.textContent = '';
-        const fromInput = input.value
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
-        const checked = Array.from(listContainer.querySelectorAll('input[type=checkbox]:checked')).map(i => i.value);
-        const toDelete = Array.from(new Set([...fromInput, ...checked]));
-        if (!toDelete.length) {
-          status.textContent = 'Keine Builds angegeben zum Löschen.';
-          return;
-        }
-
-        if (!confirm(`Lösche Builds: ${toDelete.join(', ')}`)) return;
-
-        status.innerHTML = '<div class="spinner" style="margin-right:6px;"></div> Lösche…';
-        deleteBtn.disabled = true;
-        refreshBtn.disabled = true;
-        try {
-          const res = await fetch('/.netlify/functions/deleteBuilds', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ names: toDelete })
-          });
-          const text = await res.text();
-          let data;
-          try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-          // kleine Pause, dann mehrfach nachladen
-          let remaining = [];
-          for (let attempt = 0; attempt < 3; attempt++) {
-            await new Promise(r => setTimeout(r, 600));
-            await loadList();
-            remaining = Array.from(listContainer.querySelectorAll('input')).map(i => i.value);
-            const stillPresent = toDelete.filter(n => remaining.includes(n));
-            if (stillPresent.length === 0) break;
-          }
-          const stillPresentFinal = toDelete.filter(n => remaining.includes(n));
-
-          if (!res.ok) {
-            status.innerHTML = `<span style="color:#f55;">Fehler beim Löschen: ${data.message || data.raw || res.statusText}</span>`;
-          } else if (stillPresentFinal.length) {
-            status.innerHTML = `<span style="color:#f55;">Teilweise gelöscht, noch vorhanden: ${stillPresentFinal.join(', ')}</span>`;
-          } else {
-            status.innerHTML = `<span style="color:#0f8;">Gelöscht: ${data.removed?.join(', ') || toDelete.join(', ')}</span>`;
-            input.value = '';
-          }
-        } catch (e) {
-          console.error(e);
-          status.innerHTML = `<span style="color:#f55;">Netzwerkfehler beim Löschen.</span>`;
-        } finally {
-          deleteBtn.disabled = false;
-          refreshBtn.disabled = false;
-        }
+    document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+      document.querySelectorAll('.slot').forEach(s=>{
+        s.style.backgroundImage='';
+        s.classList.remove('filled');
+        delete s.dataset.url;
+        s.classList.add('empty');
       });
+      selectedCharacter=null;
+      document.getElementById('charName').textContent='(wählen)';
+      document.getElementById('heroDisplay').innerHTML='<div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>';
+      updateBadgeCounts();
+      showToast('Zurückgesetzt');
+    });
 
-      loadList();
-    }
-
-    // Dev Panel Logic
+    // Dev panel logic
     (function(){
-      const PASSWORD = 'devpass';
-      const devToggle = document.getElementById('devToggle');
-      const panel = document.getElementById('devPanel');
-      const closeBtn = document.getElementById('devClose');
+      const PASSWORD='devpass';
+      const toggle=document.getElementById('devToggle');
+      const panel=document.getElementById('devPanel');
+      const closeBtn=document.getElementById('closeDev');
+      const refreshBtn=document.getElementById('refreshBuildsDev');
+      const buildsListEl=document.getElementById('devBuildsList');
+      const deleteBtn=document.getElementById('deleteSelectedBuilds');
+      const manualInput=document.getElementById('manualDeleteInput');
+      const status=document.getElementById('devStatus');
 
-      devToggle.addEventListener('click', ()=>{
-        const attempt = prompt('Dev Panel Passwort:');
-        if(attempt !== PASSWORD){ alert('Falsches Passwort'); return; }
+      async function loadDevBuilds(){
+        buildsListEl.innerHTML='<div class="small">Lade…</div>';
+        try {
+          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+          if(!r.ok) throw new Error();
+          const builds=await r.json();
+          buildsListEl.innerHTML='';
+          Object.keys(builds).forEach(n=>{
+            const row=document.createElement('div');
+            row.style.display='flex';
+            row.style.alignItems='center';
+            row.style.gap='8px';
+            row.style.marginBottom='4px';
+            const cb=document.createElement('input');
+            cb.type='checkbox';
+            cb.value=n;
+            const span=document.createElement('span');
+            span.textContent=n;
+            row.appendChild(cb);
+            row.appendChild(span);
+            buildsListEl.appendChild(row);
+          });
+        } catch(e){
+          buildsListEl.innerHTML='<div style="color:#f55;">Fehler</div>';
+        }
+      }
+
+      toggle.addEventListener('click', ()=>{
+        const attempt=prompt('Dev Passwort:');
+        if(attempt!==PASSWORD){ alert('Falsch'); return; }
         panel.style.display='flex';
+        loadDevBuilds();
       });
-      if (closeBtn) closeBtn.addEventListener('click', ()=> panel.style.display='none');
+      closeBtn.addEventListener('click', ()=> panel.style.display='none');
+      refreshBtn?.addEventListener('click', ()=> loadDevBuilds());
+      deleteBtn.addEventListener('click', async ()=>{
+        status.textContent='';
+        const checked = Array.from(buildsListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.value);
+        const manual = manualInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+        const toDelete = Array.from(new Set([...checked,...manual]));
+        if(!toDelete.length){ status.textContent='Keine Builds.'; return; }
+        if(!confirm(`Lösche: ${toDelete.join(', ')}`)) return;
+        status.textContent='Lösche…';
+        try {
+          const res = await fetch('/.netlify/functions/deleteBuilds',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({names:toDelete})
+          });
+          const text=await res.text();
+          let data;
+          try{ data=JSON.parse(text); } catch { data={raw:text}; }
+          if(!res.ok){
+            status.textContent=`Fehler: ${data.message||data.raw}`;
+          } else {
+            status.textContent=`Gelöscht: ${(data.removed||toDelete).join(', ')}`;
+          }
+          await loadDevBuilds();
+        } catch(e){
+          console.error(e);
+          status.textContent='Netzwerkfehler.';
+        }
+      });
     })();
 
-    window.addEventListener('load', () => {
-      initSlotClicks();
-      initDevDeleteBuildsUI();
-      const p = new URLSearchParams(location.search);
-      document.querySelectorAll('.slot').forEach(s => {
-        const url = p.get(s.dataset.slot);
-        if (url) {
-          s.style.backgroundImage = `url(${url})`;
+    // init
+    window.addEventListener('load', ()=>{
+      loadBuilds();
+      updateBadgeCounts();
+      const params=new URLSearchParams(location.search);
+      document.querySelectorAll('.slot').forEach(s=>{
+        const url=params.get(s.dataset.slot);
+        if(url){
+          s.style.backgroundImage=`url(${url})`;
           s.classList.add('filled');
-          s.dataset.url = url;
+          s.dataset.url=url;
         }
       });
-      if (p.get('character')) {
-        selectedCharacter = { download_url: p.get('character'), name: '' };
-        updateHero({ download_url: p.get('character'), name: 'URLChar' });
+      if(params.get('character')){
+        setCharacter({download_url:params.get('character'),name:'URL'});
       }
+    });
+
+    // global click sound
+    document.body.addEventListener('click', e=>{
+      const target = e.target.closest('button,.slot');
+      if (target) playSfx('clickSound');
     });
   </script>
 </body>
