@@ -22,5 +22,21 @@
       "sq4": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/13.png"
     },
     "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10044.webp"
+  },
+  "Skogul": {
+    "slots": {
+      "sq1": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/1.png",
+      "sq3": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/11.png",
+      "sq5": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/4.png",
+      "sq6": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/14.png",
+      "ct": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Artifacts/Artifact",
+      "sq2": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/21.png",
+      "sq4": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/13.png",
+      "armor1": "",
+      "armor2": "",
+      "armor3": "",
+      "armor4": ""
+    },
+    "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10401.webp"
   }
 }
