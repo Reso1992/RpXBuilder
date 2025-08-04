@@ -39,8 +39,6 @@
       max-width:1600px;
       margin:0 auto;
     }
-
-    /* Suchleiste */
     .search-bar {
       display:flex;
       gap:12px;
@@ -82,7 +80,6 @@
     .search-bar button:active { transform: scale(.95); }
     .search-bar button:hover { filter: brightness(1.05); }
 
-    /* Suchergebnisse */
     #searchResults {
       display: flex;
       flex-wrap: wrap;
@@ -149,7 +146,6 @@
       text-align:center;
     }
 
-    /* Builder */
     .builder-area {
       flex:1;
       display:flex;
@@ -459,7 +455,6 @@
     }
     .close-btn:hover { background: rgba(255,255,255,0.08); }
 
-    /* Grid für Picker-Inhalte: feste Zeilenhöhe verhindert Überlappung */
     #charItems, #iconItems {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
@@ -515,7 +510,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Scrollbars dezent */
     #charItems::-webkit-scrollbar,
     #iconItems::-webkit-scrollbar,
     #searchResults::-webkit-scrollbar {
@@ -567,19 +561,16 @@
 </head>
 <body>
   <main>
-    <!-- Suchleiste -->
     <div class="search-bar">
       <input id="searchInput" placeholder="Build-Namen…" />
       <button onclick="searchBuild()">Suchen</button>
     </div>
     <div id="searchResults"></div>
 
-    <!-- Builder -->
     <div class="builder-area">
       <div class="build-container">
         <div class="builder-character" id="builderCharacterBg"></div>
 
-        <!-- Charakter -->
         <div class="hero-slot">
           <div class="hero-preview" id="heroDisplay">
             <div style="font-size:12px;opacity:.7;" id="noCharText">Keine</div>
@@ -592,12 +583,10 @@
           </div>
         </div>
 
-        <!-- Labels -->
         <div class="group-label label-starmarks">Starmarks</div>
         <div class="group-label label-artifacts">Artifacts</div>
         <div class="group-label label-moon">Moonbadges</div>
 
-        <!-- Starmarks 2x2 -->
         <div class="starmarks">
           <div class="slot" data-slot="sq1" data-category="Starmarks"><div class="plus">+</div></div>
           <div class="slot" data-slot="sq3" data-category="Starmarks"><div class="plus">+</div></div>
@@ -605,12 +594,10 @@
           <div class="slot" data-slot="sq6" data-category="Starmarks"><div class="plus">+</div></div>
         </div>
 
-        <!-- Artifacts -->
         <div class="artifacts">
           <div class="slot" data-slot="ct" data-category="Artifacts"><div class="plus">+</div></div>
         </div>
 
-        <!-- Moonbadges -->
         <div class="moonbadges">
           <div class="moon-circle">
             <div class="slot" data-slot="sq2" data-category="MoonBadges"><div class="plus">+</div></div>
@@ -620,7 +607,6 @@
           </div>
         </div>
 
-        <!-- Aktionen -->
         <div class="actions">
           <button onclick="saveBuild()">Speichern</button>
           <button onclick="generateLink()">Link kopieren</button>
@@ -629,7 +615,6 @@
     </div>
   </main>
 
-  <!-- Character Picker Overlay -->
   <div id="charPicker">
     <div class="picker-panel">
       <div class="picker-header">
@@ -640,7 +625,6 @@
     </div>
   </div>
 
-  <!-- Icon Picker Overlay -->
   <div id="iconPicker">
     <div class="picker-panel">
       <div class="picker-header">
@@ -651,12 +635,25 @@
     </div>
   </div>
 
-  <!-- Dev Panel -->
   <button id="devToggle" style="position:fixed;top:12px;right:12px;background:#111;border:2px solid #ff4c4c;padding:8px 14px;color:#fff;border-radius:6px;cursor:pointer;z-index:999;font-size:0.85rem;backdrop-filter:blur(4px);">Dev</button>
   <div id="devPanel" aria-label="Dev Panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.95); padding:16px 18px; border-radius:10px; width:340px; max-width:90vw; box-shadow:0 0 24px rgba(255,76,76,.7); z-index:1000; color:#fff; font-size:13px; gap:8px; font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
     <button id="devClose" style="position:absolute; top:6px; right:6px; background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
     <h4 style="margin:0 0 6px; font-size:1rem; letter-spacing:1px;">Developer Panel</h4>
-    <!-- ... der Rest des Dev-Panels bleibt unverändert ... -->
+
+    <!-- Lösch-UI für Builds -->
+    <div id="delete-build-section" style="margin-top:12px; display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+      <div style="font-size:0.9rem; font-weight:600;">Builds löschen (Komma-getrennt oder Haken wählen):</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;">
+        <input id="deleteBuildInput" placeholder="z.B. TestBuild1,TestBuild2" style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:#111; color:#fff; min-width:180px;" />
+        <button id="refreshBuildsForDelete" style="padding:8px 12px; background:#444; border:none; border-radius:6px; cursor:pointer; color:#fff;">Liste laden</button>
+        <button id="deleteBuildsBtn" style="padding:8px 12px; background:var(--accent); border:none; border-radius:6px; cursor:pointer; color:#fff;">Löschen</button>
+      </div>
+      <div id="availableBuildsList" style="max-height:220px; overflow:auto; background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; font-size:12px;">
+        <div style="opacity:.6;">Klicke "Liste laden", um aktuelle Builds zu sehen.</div>
+      </div>
+      <div id="deleteStatus" style="font-size:12px; margin-top:4px;"></div>
+    </div>
+    <!-- ... weiteres Dev-Panel-Inhalt ... -->
   </div>
 
   <script>
@@ -672,7 +669,6 @@
       Characters: 'Characters'
     };
 
-    // Ladeanzeige einfügen
     function showLoading(container, text) {
       container.innerHTML = '';
       const loading = document.createElement('div');
@@ -681,7 +677,6 @@
       container.appendChild(loading);
     }
 
-    // Slot-Listener initialisieren (einmalig)
     function initSlotClicks() {
       document.querySelectorAll('.slot').forEach(slot => {
         if (slot.__bound) slot.removeEventListener('click', slot.__bound);
@@ -735,7 +730,6 @@
       document.getElementById('iconPicker').style.display = 'none';
     }
 
-    // Charakter Picker öffnen
     async function openCharacterPicker() {
       const container = document.getElementById('charItems');
       if (!container) return;
@@ -777,7 +771,6 @@
       document.getElementById('charPicker').style.display = 'none';
     }
 
-    // Hero aktualisieren
     function updateHero(f) {
       const disp = document.getElementById('heroDisplay');
       const noText = document.getElementById('noCharText');
@@ -810,15 +803,19 @@
       big.style.opacity = '0.18';
     }
 
-    // Build speichern
     async function saveBuild() {
       const name = prompt('Name für Deinen Build:');
       if (!name) return;
+
       const slots = {};
       document.querySelectorAll('.slot').forEach(s => {
         slots[s.dataset.slot] = s.dataset.url || '';
       });
       const character = selectedCharacter ? selectedCharacter.download_url : '';
+
+      const payload = { name, slots, character };
+      console.log('Speichere Build-Payload:', payload);
+
       try {
         const res = await fetch('/.netlify/functions/saveBuilds', {
           method: 'POST',
@@ -831,42 +828,62 @@
         }
         alert(`Build "${name}" gespeichert.`);
       } catch (err) {
-        console.error(err);
-        alert('Fehler beim Speichern in GitHub.');
+        console.error('Fehler beim Remote-Speichern:', err);
+        alert('Fehler beim Speichern in GitHub. Build wurde eventuell nicht übernommen.');
       }
     }
 
-    // Build laden
     async function loadBuild(name) {
+      let data = null;
+
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if (!r.ok) throw new Error('builds.json nicht verfügbar');
-        const builds = await r.json();
-        const data = builds[name];
-        if (!data) return alert(`Build "${name}" nicht gefunden.`);
-        document.querySelectorAll('.slot').forEach(s => {
-          const url = data.slots?.[s.dataset.slot] || '';
-          if (url) {
-            s.style.backgroundImage = `url(${url})`;
-            s.classList.add('filled');
-            s.dataset.url = url;
-          } else {
-            s.style.backgroundImage = '';
-            s.classList.remove('filled');
-            delete s.dataset.url;
-          }
-        });
-        if (data.character) {
-          selectedCharacter = { download_url: data.character, name: '' };
-          updateHero({ download_url: data.character, name: 'BuildChar' });
+        if (r.ok) {
+          const builds = await r.json();
+          if (builds[name]) data = builds[name];
         }
       } catch (e) {
-        console.error(e);
-        alert('Fehler beim Laden des Builds.');
+        console.warn('Remote load fehlgeschlagen', e);
+      }
+
+      if (!data) {
+        try {
+          const stored = JSON.parse(localStorage.getItem('rpx_builds') || '{}');
+          if (stored[name]) data = stored[name];
+        } catch (e) {
+          console.warn('LocalStorage fallback fehlgeschlagen', e);
+        }
+      }
+
+      if (!data) return alert(`Build "${name}" nicht gefunden.`);
+
+      document.querySelectorAll('.slot').forEach(s => {
+        const url = data.slots?.[s.dataset.slot] || '';
+        if (url) {
+          s.style.backgroundImage = `url(${url})`;
+          s.classList.add('filled');
+          s.dataset.url = url;
+        } else {
+          s.style.backgroundImage = '';
+          s.classList.remove('filled');
+          delete s.dataset.url;
+        }
+      });
+
+      if (data.character) {
+        selectedCharacter = { download_url: data.character, name: 'LoadedChar' };
+        updateHero({ download_url: data.character, name: 'LoadedChar' });
+      } else {
+        selectedCharacter = null;
+        const disp = document.getElementById('heroDisplay');
+        if (disp) {
+          disp.innerHTML = '<div style="font-size:12px;opacity:.7;" id="noCharText">Keine</div>';
+        }
+        const bg = document.querySelector('.hero-background');
+        if (bg) bg.style.backgroundImage = '';
       }
     }
 
-    // Suche mit Bild & Slots
     async function searchBuild() {
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const res = document.getElementById('searchResults');
@@ -945,24 +962,95 @@
         .then(() => alert('Link kopiert!'));
     }
 
-    window.addEventListener('load', () => {
-      initSlotClicks();
-      const p = new URLSearchParams(location.search);
-      document.querySelectorAll('.slot').forEach(s => {
-        const url = p.get(s.dataset.slot);
-        if (url) {
-          s.style.backgroundImage = `url(${url})`;
-          s.classList.add('filled');
-          s.dataset.url = url;
+    // Dev Delete Builds helpers
+    async function fetchBuildNames() {
+      try {
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
+        if (!r.ok) throw new Error('builds.json nicht erreichbar');
+        const builds = await r.json();
+        return Object.keys(builds);
+      } catch (e) {
+        console.error('Fehler beim Laden der Builds:', e);
+        return null;
+      }
+    }
+
+    function initDevDeleteBuildsUI() {
+      const refreshBtn = document.getElementById('refreshBuildsForDelete');
+      const deleteBtn = document.getElementById('deleteBuildsBtn');
+      const input = document.getElementById('deleteBuildInput');
+      const listContainer = document.getElementById('availableBuildsList');
+      const status = document.getElementById('deleteStatus');
+
+      async function loadList() {
+        listContainer.innerHTML = '<div class="picker-loading"><div class="spinner"></div><div>Lade Builds…</div></div>';
+        const names = await fetchBuildNames();
+        if (!names) {
+          listContainer.innerHTML = '<div style="color:#f55;">Fehler beim Laden der Builds.</div>';
+          return;
+        }
+        listContainer.innerHTML = '';
+        names.forEach(n => {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+          row.style.gap = '8px';
+          row.style.marginBottom = '4px';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = n;
+          cb.style.flex = '0 0 auto';
+          const label = document.createElement('span');
+          label.textContent = n;
+          label.style.flex = '1';
+          row.appendChild(cb);
+          row.appendChild(label);
+          listContainer.appendChild(row);
+        });
+      }
+
+      refreshBtn?.addEventListener('click', loadList);
+
+      deleteBtn?.addEventListener('click', async () => {
+        status.textContent = '';
+        const fromInput = input.value
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+        const checked = Array.from(listContainer.querySelectorAll('input[type=checkbox]:checked')).map(i => i.value);
+        const toDelete = Array.from(new Set([...fromInput, ...checked]));
+        if (!toDelete.length) {
+          status.textContent = 'Keine Builds angegeben zum Löschen.';
+          return;
+        }
+
+        if (!confirm(`Lösche Builds: ${toDelete.join(', ')}`)) return;
+
+        status.textContent = 'Lösche…';
+        try {
+          const res = await fetch('/.netlify/functions/deleteBuilds', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ names: toDelete })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            status.innerHTML = `<span style="color:#f55;">Fehler: ${data || res.statusText}</span>`;
+          } else {
+            status.innerHTML = `<span style="color:#0f8;">Gelöscht: ${data.removed.join(', ')}</span>`;
+            input.value = '';
+            await loadList();
+          }
+        } catch (e) {
+          console.error(e);
+          status.innerHTML = `<span style="color:#f55;">Netzwerkfehler beim Löschen.</span>`;
         }
       });
-      if (p.get('character')) {
-        selectedCharacter = { download_url: p.get('character'), name: '' };
-        updateHero({ download_url: p.get('character'), name: 'URLChar' });
-      }
-    });
 
-    // Dev Panel Logic (robust)
+      loadList();
+    }
+
+    // Dev Panel Logic
     (function(){
       const PASSWORD = 'devpass';
       const devToggle = document.getElementById('devToggle');
@@ -1026,7 +1114,7 @@
       applyState();
 
       devToggle.addEventListener('click', ()=>{
-        const attempt = prompt('Dev Panel Passwort:');
+        const attempt = prompt('Falsches Passwort'); // du kannst "Dev Panel Passwort:" machen
         if(attempt !== PASSWORD){ alert('Falsches Passwort'); return; }
         panel.style.display='flex';
       });
@@ -1059,6 +1147,25 @@
         alert('CSS kopiert. Wenn du willst, kannst du es später manuell ins :root schreiben.');
       });
     })();
+
+    window.addEventListener('load', () => {
+      initSlotClicks();
+      initDevDeleteBuildsUI();
+
+      const p = new URLSearchParams(location.search);
+      document.querySelectorAll('.slot').forEach(s => {
+        const url = p.get(s.dataset.slot);
+        if (url) {
+          s.style.backgroundImage = `url(${url})`;
+          s.classList.add('filled');
+          s.dataset.url = url;
+        }
+      });
+      if (p.get('character')) {
+        selectedCharacter = { download_url: p.get('character'), name: '' };
+        updateHero({ download_url: p.get('character'), name: 'URLChar' });
+      }
+    });
   </script>
 </body>
 </html>
