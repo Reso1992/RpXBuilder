@@ -801,38 +801,111 @@
       big.style.opacity = '0.18';
     }
 
+    // Neue saveBuild mit Feedback / Duplikat-Prüfung / Timeout
+    let isSaving = false;
     async function saveBuild() {
+      if (isSaving) return;
       const name = prompt('Name für Deinen Build:');
       if (!name) return;
+
+      let existing = {};
+      try {
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+        if (r.ok) existing = await r.json();
+        if (existing[name]) {
+          const overwrite = confirm(`Ein Build mit dem Namen "${name}" existiert bereits. Überschreiben?`);
+          if (!overwrite) return;
+        }
+      } catch (e) {
+        console.warn('Vorhandene Builds konnten nicht geprüft werden, fahre trotzdem fort.', e);
+      }
+
+      const saveBtn = Array.from(document.querySelectorAll('.actions button')).find(b => b.textContent.toLowerCase().includes('speichern'));
+      const originalText = saveBtn ? saveBtn.textContent : '';
+
+      isSaving = true;
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Speichern…';
+      }
+
+      const statusElId = 'save-status-toast';
+      let statusEl = document.getElementById(statusElId);
+      if (!statusEl) {
+        statusEl = document.createElement('div');
+        statusEl.id = statusElId;
+        Object.assign(statusEl.style, {
+          position: 'fixed',
+          top: '12px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.85)',
+          padding: '10px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#fff',
+        });
+        document.body.appendChild(statusEl);
+      }
+      statusEl.innerHTML = `
+        <div style="width:16px;height:16px;border:3px solid rgba(255,255,255,0.3);border-top-color:#ff4c4c;border-radius:50%;animation:spin .8s linear infinite;"></div>
+        Speichere Build "${name}"… das kann 1–3 Sekunden dauern. Bitte nicht erneut klicken.
+      `;
 
       const slots = {};
       document.querySelectorAll('.slot').forEach(s => {
         slots[s.dataset.slot] = s.dataset.url || '';
       });
       const character = selectedCharacter ? selectedCharacter.download_url : '';
-
       const payload = { name, slots, character };
-      console.log('Speichere Build-Payload:', payload);
 
+      const maxWait = 10000;
+      let timeoutHandle;
       try {
-        const res = await fetch('/.netlify/functions/saveBuilds', {
+        const savePromise = fetch('/.netlify/functions/saveBuilds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, slots, character })
+          body: JSON.stringify(payload)
         });
+
+        const res = await Promise.race([
+          savePromise,
+          new Promise((_, rej) => {
+            timeoutHandle = setTimeout(() => rej(new Error('Timeout beim Speichern')), maxWait);
+          })
+        ]);
+        clearTimeout(timeoutHandle);
+
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(text);
+          throw new Error(text || `Status ${res.status}`);
         }
+
+        statusEl.innerHTML = `✅ Build "${name}" erfolgreich gespeichert.`; 
+        setTimeout(() => { statusEl.remove(); }, 2200);
         alert(`Build "${name}" gespeichert.`);
       } catch (err) {
-        console.error('Fehler beim Remote-Speichern:', err);
-        alert('Fehler beim Speichern in GitHub. Build wurde eventuell nicht übernommen.');
+        console.error('Speichern fehlgeschlagen:', err);
+        statusEl.innerHTML = `<span style="color:#f55;">Speichern fehlgeschlagen: ${err.message}</span>`;
+        setTimeout(() => {
+          if (statusEl) statusEl.remove();
+        }, 4000);
+      } finally {
+        isSaving = false;
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          if (originalText) saveBtn.textContent = originalText;
+        }
       }
     }
 
     async function loadBuild(name) {
       let data = null;
+
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
         if (r.ok) {
@@ -959,7 +1032,7 @@
         .then(() => alert('Link kopiert!'));
     }
 
-    // frischeste Buildliste (Github Contents API raw)
+    // Dev delete builds helpers (frisch laden)
     async function fetchBuildNames() {
       try {
         const res = await fetch(`https://api.github.com/repos/${REPO}/contents/builds.json?ref=${BRANCH}`, {
@@ -1026,7 +1099,9 @@
 
         if (!confirm(`Lösche Builds: ${toDelete.join(', ')}`)) return;
 
-        status.textContent = 'Lösche…';
+        status.innerHTML = '<div class="spinner" style="margin-right:6px;"></div> Lösche…';
+        deleteBtn.disabled = true;
+        refreshBtn.disabled = true;
         try {
           const res = await fetch('/.netlify/functions/deleteBuilds', {
             method: 'POST',
@@ -1037,15 +1112,21 @@
           let data;
           try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
-          // Liste frisch neu laden und prüfen
-          await loadList();
-          const remaining = Array.from(listContainer.querySelectorAll('input')).map(i => i.value);
-          const stillPresent = toDelete.filter(n => remaining.includes(n));
+          // kleine Pause, dann mehrfach nachladen
+          let remaining = [];
+          for (let attempt = 0; attempt < 3; attempt++) {
+            await new Promise(r => setTimeout(r, 600));
+            await loadList();
+            remaining = Array.from(listContainer.querySelectorAll('input')).map(i => i.value);
+            const stillPresent = toDelete.filter(n => remaining.includes(n));
+            if (stillPresent.length === 0) break;
+          }
+          const stillPresentFinal = toDelete.filter(n => remaining.includes(n));
 
           if (!res.ok) {
             status.innerHTML = `<span style="color:#f55;">Fehler beim Löschen: ${data.message || data.raw || res.statusText}</span>`;
-          } else if (stillPresent.length) {
-            status.innerHTML = `<span style="color:#f55;">Teilweise gelöscht, noch vorhanden: ${stillPresent.join(', ')}</span>`;
+          } else if (stillPresentFinal.length) {
+            status.innerHTML = `<span style="color:#f55;">Teilweise gelöscht, noch vorhanden: ${stillPresentFinal.join(', ')}</span>`;
           } else {
             status.innerHTML = `<span style="color:#0f8;">Gelöscht: ${data.removed?.join(', ') || toDelete.join(', ')}</span>`;
             input.value = '';
@@ -1053,74 +1134,21 @@
         } catch (e) {
           console.error(e);
           status.innerHTML = `<span style="color:#f55;">Netzwerkfehler beim Löschen.</span>`;
+        } finally {
+          deleteBtn.disabled = false;
+          refreshBtn.disabled = false;
         }
       });
 
       loadList();
     }
 
-    // Dev Panel Logic (angepasst)
+    // Dev Panel Logic
     (function(){
       const PASSWORD = 'devpass';
       const devToggle = document.getElementById('devToggle');
       const panel = document.getElementById('devPanel');
       const closeBtn = document.getElementById('devClose');
-      const inpSlotSmall = document.getElementById('inpSlotSmall');
-      const inpSlotBig = document.getElementById('inpSlotBig');
-      const inpGap = document.getElementById('inpGap');
-      const inpBuilderScale = document.getElementById('inpBuilderScale');
-      const inpLabelOffsetX = document.getElementById('inpLabelOffsetX');
-      const inpLabelOffsetY = document.getElementById('inpLabelOffsetY');
-      const exportCSS = document.getElementById('exportCSS');
-
-      const defaults = {
-        '--slot-small': 110,
-        '--slot-big': 220,
-        '--gap': 18,
-        'builder-scale': 1,
-        labelOffsetX: 0,
-        labelOffsetY: 0
-      };
-      let state = JSON.parse(localStorage.getItem('rpxDevConfig')||'{}');
-      state = Object.assign({}, defaults, state);
-
-      function syncInputs(){
-        if (!inpSlotSmall) return;
-        inpSlotSmall.value = state['--slot-small'];
-        inpSlotBig.value = state['--slot-big'];
-        inpGap.value = state['--gap'];
-        inpBuilderScale.value = state['builder-scale'];
-        inpLabelOffsetX.value = state.labelOffsetX;
-        inpLabelOffsetY.value = state.labelOffsetY;
-      }
-      function applyState(){
-        document.documentElement.style.setProperty('--slot-small', state['--slot-small'] + 'px');
-        document.documentElement.style.setProperty('--slot-big', state['--slot-big'] + 'px');
-        document.documentElement.style.setProperty('--gap', state['--gap'] + 'px');
-        document.documentElement.style.setProperty('--builder-scale', state['builder-scale']);
-        document.documentElement.style.setProperty('--label-offset-x', state.labelOffsetX + 'px');
-        document.documentElement.style.setProperty('--label-offset-y', state.labelOffsetY + 'px');
-        const container = document.querySelector('.build-container');
-        if(container) container.style.transform = `scale(${state['builder-scale']})`;
-        updateExport();
-      }
-      function updateExport(){
-        if (!exportCSS) return;
-        exportCSS.value = `
-:root {
-  --slot-small: ${state['--slot-small']}px;
-  --slot-big: ${state['--slot-big']}px;
-  --gap: ${state['--gap']}px;
-  --builder-scale: ${state['builder-scale']};
-  --label-offset-x: ${state.labelOffsetX}px;
-  --label-offset-y: ${state.labelOffsetY}px;
-}
-`.trim();
-      }
-      function persist(){ localStorage.setItem('rpxDevConfig', JSON.stringify(state)); }
-
-      syncInputs();
-      applyState();
 
       devToggle.addEventListener('click', ()=>{
         const attempt = prompt('Dev Panel Passwort:');
@@ -1128,33 +1156,6 @@
         panel.style.display='flex';
       });
       if (closeBtn) closeBtn.addEventListener('click', ()=> panel.style.display='none');
-
-      const applyBtn = document.getElementById('applyDev');
-      const resetBtn = document.getElementById('resetDev');
-      const copyBtn = document.getElementById('copyCSS');
-
-      if (applyBtn) applyBtn.addEventListener('click', ()=>{
-        state['--slot-small'] = parseInt(inpSlotSmall?.value) || defaults['--slot-small'];
-        state['--slot-big'] = parseInt(inpSlotBig?.value) || defaults['--slot-big'];
-        state['--gap'] = parseInt(inpGap?.value) || defaults['--gap'];
-        state['builder-scale'] = parseFloat(inpBuilderScale?.value) || defaults['builder-scale'];
-        state.labelOffsetX = parseInt(inpLabelOffsetX?.value) || 0;
-        state.labelOffsetY = parseInt(inpLabelOffsetY?.value) || 0;
-        persist();
-        applyState();
-      });
-      if (resetBtn) resetBtn.addEventListener('click', ()=>{
-        state = Object.assign({}, defaults);
-        syncInputs();
-        persist();
-        applyState();
-      });
-      if (copyBtn) copyBtn.addEventListener('click', ()=>{
-        if (!exportCSS) return;
-        exportCSS.select();
-        document.execCommand('copy');
-        alert('CSS kopiert. Wenn du willst, kannst du es später manuell ins :root schreiben.');
-      });
     })();
 
     window.addEventListener('load', () => {
