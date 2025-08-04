@@ -1,1 +1,14 @@
-
+{
+  "Test1": {
+    "slots": {
+      "sq1": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/13.png",
+      "sq3": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/15.png",
+      "sq5": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/17.png",
+      "sq6": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/15.png",
+      "ct": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Artifacts/Screenshot%202025-08-04%20004410.png",
+      "sq2": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/14.png",
+      "sq4": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/12.png"
+    },
+    "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10205.webp"
+  }
+}
