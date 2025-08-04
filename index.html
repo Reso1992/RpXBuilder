@@ -45,6 +45,7 @@
     grid-template-columns:280px 1fr;
     gap:20px;
   }
+
   .character-panel {
     background: var(--panel);
     border-radius:12px;
@@ -118,6 +119,7 @@
     border:1px solid rgba(255,255,255,0.12);
     pointer-events: none;
   }
+
   .sidebar {
     display:flex;
     flex-direction:column;
@@ -178,6 +180,7 @@
     pointer-events:none;
     display:block;
   }
+
   .side {
     display:flex;
     flex-direction:column;
@@ -231,12 +234,14 @@
   }
   .btn:hover { filter:brightness(1.1); }
   .btn:active { transform:scale(.95); }
+
   /* Builds & Suche */
   .builds-search {
     display:flex;
     gap:8px;
     align-items:center;
   }
+
   /* Picker-Card mit Name & Slot-Previews */
   .picker-card {
     background: rgba(255,255,255,0.02);
@@ -282,6 +287,7 @@
     border-radius:3px;
     border:1px solid rgba(255,255,255,0.12);
   }
+
   .overlay {
     position:fixed;
     inset:0;
@@ -318,7 +324,7 @@
   }
   .close-btn {
     background:transparent;
-    border:none;
+   	border:none;
     font-size:1.2rem;
     color:#fff;
     cursor:pointer;
@@ -343,6 +349,7 @@
     font-size:14px;
     padding:30px 0;
   }
+
   #toast {
     position:fixed;
     top:14px;
@@ -358,6 +365,7 @@
     color:#fff;
     box-shadow:0 0 60px rgba(165,108,255,0.5);
   }
+
   #devToggle {
     position:fixed;
     top:14px;
@@ -394,6 +402,7 @@
   .dev-input { flex:1; padding:8px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; }
   .builds-checkboxes { max-height:160px; overflow:auto; background: rgba(255,255,255,0.02); padding:8px; border-radius:6px; }
   .small { font-size:12px; opacity:.8; }
+
   .build-loading-overlay {
     position:fixed;
     inset:0;
@@ -495,7 +504,6 @@
         <div class="actions">
           <button class="btn" id="saveBuildBtn">Speichern</button>
           <button class="btn" id="copyLinkBtn">Link kopieren</button>
-          <button class="btn secondary" id="resetAllBtn">Zurücksetzen</button>
         </div>
       </div>
       <div class="card">
@@ -607,14 +615,6 @@
           img.src=f.download_url; img.alt=f.name; img.loading='lazy';
           img.onerror=()=>{ img.style.filter='grayscale(100%)'; img.style.opacity='.5'; };
           card.appendChild(img);
-          if(title==='Alle Builds' || title.startsWith('Suche')){
-            // For builds, append name & previews
-            const nameDiv=document.createElement('div');
-            nameDiv.className='build-name';
-            nameDiv.textContent=f.name.replace(/\.[^/.]+$/,'');
-            card.appendChild(nameDiv);
-            // But actual builds context uses loadBuilds, not this picker
-          }
           card.onclick=()=>{
             onSelect(f);
             playSfx('popSound');
@@ -666,15 +666,9 @@
         showToast('Charakter gesetzt');
       });
     });
+    // Single "Zurücksetzen" at top clears everything
     document.getElementById('clearCharacter').addEventListener('click', ()=>{
-      selectedCharacter=null;
-      document.getElementById('charName').textContent='(wählen)';
-      document.getElementById('heroDisplay').innerHTML='<div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>';
-      showToast('Charakter entfernt');
-    });
-
-    // Reset all
-    document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+      // reset all slots + character
       document.querySelectorAll('.slot').forEach(s=>{
         s.classList.replace('filled','empty');
         s.removeAttribute('style');
@@ -702,7 +696,6 @@
         found=true;
         const card=document.createElement('div');
         card.className='picker-card';
-        // thumbnail
         const thumb=data.character||Object.values(data.slots||{}).find(u=>u)||'';
         if(thumb){
           const img=document.createElement('img');
