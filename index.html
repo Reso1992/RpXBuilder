@@ -640,7 +640,6 @@
     <button id="devClose" style="position:absolute; top:6px; right:6px; background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
     <h4 style="margin:0 0 6px; font-size:1rem; letter-spacing:1px;">Developer Panel</h4>
 
-    <!-- Lösch-UI für Builds -->
     <div id="delete-build-section" style="margin-top:12px; display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
       <div style="font-size:0.9rem; font-weight:600;">Builds löschen (Komma-getrennt oder Haken wählen):</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start;">
@@ -653,7 +652,6 @@
       </div>
       <div id="deleteStatus" style="font-size:12px; margin-top:4px;"></div>
     </div>
-    <!-- ... weiteres Dev-Panel-Inhalt ... -->
   </div>
 
   <script>
@@ -835,7 +833,6 @@
 
     async function loadBuild(name) {
       let data = null;
-
       try {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
         if (r.ok) {
@@ -962,12 +959,15 @@
         .then(() => alert('Link kopiert!'));
     }
 
-    // Dev Delete Builds helpers
+    // frischeste Buildliste (Github Contents API raw)
     async function fetchBuildNames() {
       try {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json`);
-        if (!r.ok) throw new Error('builds.json nicht erreichbar');
-        const builds = await r.json();
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/builds.json?ref=${BRANCH}`, {
+          headers: { Accept: 'application/vnd.github.v3.raw' }
+        });
+        if (!res.ok) throw new Error(`Fehler beim Laden: ${res.status}`);
+        const text = await res.text();
+        const builds = JSON.parse(text);
         return Object.keys(builds);
       } catch (e) {
         console.error('Fehler beim Laden der Builds:', e);
@@ -1033,13 +1033,22 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ names: toDelete })
           });
-          const data = await res.json();
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+          // Liste frisch neu laden und prüfen
+          await loadList();
+          const remaining = Array.from(listContainer.querySelectorAll('input')).map(i => i.value);
+          const stillPresent = toDelete.filter(n => remaining.includes(n));
+
           if (!res.ok) {
-            status.innerHTML = `<span style="color:#f55;">Fehler: ${data || res.statusText}</span>`;
+            status.innerHTML = `<span style="color:#f55;">Fehler beim Löschen: ${data.message || data.raw || res.statusText}</span>`;
+          } else if (stillPresent.length) {
+            status.innerHTML = `<span style="color:#f55;">Teilweise gelöscht, noch vorhanden: ${stillPresent.join(', ')}</span>`;
           } else {
-            status.innerHTML = `<span style="color:#0f8;">Gelöscht: ${data.removed.join(', ')}</span>`;
+            status.innerHTML = `<span style="color:#0f8;">Gelöscht: ${data.removed?.join(', ') || toDelete.join(', ')}</span>`;
             input.value = '';
-            await loadList();
           }
         } catch (e) {
           console.error(e);
@@ -1050,7 +1059,7 @@
       loadList();
     }
 
-    // Dev Panel Logic
+    // Dev Panel Logic (angepasst)
     (function(){
       const PASSWORD = 'devpass';
       const devToggle = document.getElementById('devToggle');
@@ -1114,7 +1123,7 @@
       applyState();
 
       devToggle.addEventListener('click', ()=>{
-        const attempt = prompt('Falsches Passwort'); // du kannst "Dev Panel Passwort:" machen
+        const attempt = prompt('Dev Panel Passwort:');
         if(attempt !== PASSWORD){ alert('Falsches Passwort'); return; }
         panel.style.display='flex';
       });
@@ -1151,7 +1160,6 @@
     window.addEventListener('load', () => {
       initSlotClicks();
       initDevDeleteBuildsUI();
-
       const p = new URLSearchParams(location.search);
       document.querySelectorAll('.slot').forEach(s => {
         const url = p.get(s.dataset.slot);
