@@ -10,5 +10,17 @@
       "sq4": ""
     },
     "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10046.webp"
+  },
+  "Test 2": {
+    "slots": {
+      "sq1": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/12.png",
+      "sq3": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/12.png",
+      "sq5": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/12.png",
+      "sq6": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/12.png",
+      "ct": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Artifacts/Screenshot%202025-08-04%20004410.png",
+      "sq2": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/12.png",
+      "sq4": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/13.png"
+    },
+    "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10044.webp"
   }
 }
