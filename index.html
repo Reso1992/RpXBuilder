@@ -45,7 +45,6 @@
     grid-template-columns:280px 1fr;
     gap:20px;
   }
-
   .character-panel {
     background: var(--panel);
     border-radius:12px;
@@ -119,7 +118,6 @@
     border:1px solid rgba(255,255,255,0.12);
     pointer-events: none;
   }
-
   .sidebar {
     display:flex;
     flex-direction:column;
@@ -180,7 +178,6 @@
     pointer-events:none;
     display:block;
   }
-
   .side {
     display:flex;
     flex-direction:column;
@@ -234,43 +231,57 @@
   }
   .btn:hover { filter:brightness(1.1); }
   .btn:active { transform:scale(.95); }
-
-  .search {
+  /* Builds & Suche */
+  .builds-search {
     display:flex;
     gap:8px;
-    flex-wrap:wrap;
+    align-items:center;
   }
-  .search input {
-    flex:1;
-    padding:10px 12px;
-    border-radius:6px;
-    border:1px solid rgba(255,255,255,0.15);
+  /* Picker-Card mit Name & Slot-Previews */
+  .picker-card {
     background: rgba(255,255,255,0.02);
-    color: var(--text);
-    outline:none;
-    min-width:120px;
-  }
-  .build-list {
+    border-radius:8px;
+    padding:8px;
+    cursor:pointer;
     display:flex;
     flex-direction:column;
-    gap:6px;
-    max-height:260px;
-    overflow:auto;
-  }
-  .build-item {
-    background: rgba(255,255,255,0.03);
-    padding:10px 12px;
-    border-radius:6px;
-    display:flex;
-    justify-content:space-between;
     align-items:center;
-    cursor:pointer;
-    font-size:0.9rem;
-    transition:background var(--transition);
+    gap:6px;
+    position:relative;
+    transition:transform var(--transition), box-shadow .25s ease;
     border:1px solid rgba(255,255,255,0.08);
+    min-width:120px;
   }
-  .build-item:hover { background: rgba(255,255,255,0.05); }
-
+  .picker-card:hover {
+    transform:translateY(-2px);
+    box-shadow:0 0 24px var(--neon1);
+  }
+  .picker-card img {
+    max-width:80px;
+    max-height:80px;
+    object-fit:contain;
+    border-radius:4px;
+    display:block;
+  }
+  .picker-card .build-name {
+    font-size:0.85rem;
+    text-align:center;
+    word-break:break-word;
+    max-width:100px;
+  }
+  .picker-card .slot-previews {
+    display:flex;
+    gap:4px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .picker-card .slot-previews img {
+    width:16px;
+    height:16px;
+    object-fit:cover;
+    border-radius:3px;
+    border:1px solid rgba(255,255,255,0.12);
+  }
   .overlay {
     position:fixed;
     inset:0;
@@ -324,30 +335,6 @@
     max-height:65vh;
     overflow:auto;
   }
-  .picker-card {
-    background: rgba(255,255,255,0.02);
-    border-radius:8px;
-    padding:8px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height:100px;
-    position:relative;
-    transition:transform var(--transition), box-shadow .25s ease;
-    border:1px solid rgba(255,255,255,0.08);
-  }
-  .picker-card:hover {
-    transform:translateY(-2px);
-    box-shadow:0 0 24px var(--neon1);
-  }
-  .picker-card img {
-    max-width:100%;
-    max-height:100%;
-    object-fit:contain;
-    border-radius:4px;
-    display:block;
-  }
   .loading {
     display:flex;
     gap:12px;
@@ -356,7 +343,6 @@
     font-size:14px;
     padding:30px 0;
   }
-
   #toast {
     position:fixed;
     top:14px;
@@ -372,7 +358,6 @@
     color:#fff;
     box-shadow:0 0 60px rgba(165,108,255,0.5);
   }
-
   #devToggle {
     position:fixed;
     top:14px;
@@ -409,7 +394,6 @@
   .dev-input { flex:1; padding:8px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; }
   .builds-checkboxes { max-height:160px; overflow:auto; background: rgba(255,255,255,0.02); padding:8px; border-radius:6px; }
   .small { font-size:12px; opacity:.8; }
-
   .build-loading-overlay {
     position:fixed;
     inset:0;
@@ -432,7 +416,6 @@
     animation:spin 1s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
-
   @media (max-width:1250px){
     .container { grid-template-columns:1fr; }
     .sidebar, .side { order:2; }
@@ -517,11 +500,11 @@
       </div>
       <div class="card">
         <h3>Builds &amp; Suche</h3>
-        <div class="search">
-          <input id="searchInput" placeholder="Build suchen..." />
+        <div class="builds-search">
+          <input id="searchInput" placeholder="Build suchen…" />
           <button class="btn secondary" id="searchBtn">Suchen</button>
+          <button class="btn" id="showAllBtn">Show all Builds</button>
         </div>
-        <div class="build-list" id="buildList"></div>
       </div>
     </div>
   </div>
@@ -534,7 +517,10 @@
         <button class="close-btn" onclick="closePicker()">✕</button>
       </div>
       <div class="picker-body" id="pickerBody">
-        <div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2); border-top-color: var(--neon1); border-radius:50%; width:18px; height:18px; margin-right:8px;"></div><div>Lade...</div></div>
+        <div class="loading">
+          <div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div>
+          <div>Lade…</div>
+        </div>
       </div>
     </div>
   </div>
@@ -569,7 +555,7 @@
     <div id="buildLoadingText">Lade Build…</div>
   </div>
 
-  <!-- Sounds (Platzhalter) -->
+  <!-- Sounds -->
   <audio id="clickSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
   <audio id="popSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
 
@@ -577,52 +563,58 @@
     const REPO = 'Reso1992/RpXBuilder';
     const BRANCH = 'main';
     let selectedCharacter = null;
-
     const categoryFolderMap = {
       Starmarks: 'Starmarks',
       Artifacts: 'Artifacts',
       MoonBadges: 'Moonbadges',
-      Armor: 'Armor', // neuer Ordner für Rüstung (anpassen falls anders)
+      Armor: 'Armor',
       Characters: 'Characters'
     };
 
-    // Toast
+    // Toast & SFX
     const toastEl = document.getElementById('toast');
-    function showToast(msg, d=1800){
+    function showToast(msg,d=1800){
       toastEl.textContent = msg;
       toastEl.style.display='flex';
       clearTimeout(toastEl._t);
       toastEl._t = setTimeout(()=> toastEl.style.display='none', d);
     }
-    function playSfx(id){ const a=document.getElementById(id); if(a){ a.currentTime=0; a.play().catch(()=>{}); } }
+    function playSfx(id){
+      const a=document.getElementById(id);
+      if(a){ a.currentTime=0; a.play().catch(()=>{}); }
+    }
 
+    // Fetch GitHub folder
     async function fetchFolder(folder){
       const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${folder}?ref=${BRANCH}`);
       if(!res.ok) throw new Error(`Fetch fehlgeschlagen (${res.status})`);
       return res.json();
     }
 
+    // Picker overlay
     function openPicker(title, fetcher, onSelect){
       document.getElementById('pickerTitle').textContent=title;
       const body = document.getElementById('pickerBody');
-      body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2); border-top-color: var(--neon1); border-radius:50%; width:18px; height:18px; margin-right:8px;"></div><div>Lade...</div></div>';
+      body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Lade…</div></div>';
       document.getElementById('pickerOverlay').style.display='flex';
       fetcher().then(files=>{
         body.innerHTML='';
-        if(!files || !files.length){
-          body.innerHTML='<div style="padding:16px;color:#f55;">Keine Einträge.</div>';
-          return;
-        }
         files.forEach(f=>{
           if(f.type!=='file') return;
           const card=document.createElement('div');
           card.className='picker-card';
           const img=document.createElement('img');
-          img.src = f.download_url;
-          img.alt = f.name;
-          img.loading='lazy';
+          img.src=f.download_url; img.alt=f.name; img.loading='lazy';
           img.onerror=()=>{ img.style.filter='grayscale(100%)'; img.style.opacity='.5'; };
           card.appendChild(img);
+          if(title==='Alle Builds' || title.startsWith('Suche')){
+            // For builds, append name & previews
+            const nameDiv=document.createElement('div');
+            nameDiv.className='build-name';
+            nameDiv.textContent=f.name.replace(/\.[^/.]+$/,'');
+            card.appendChild(nameDiv);
+            // But actual builds context uses loadBuilds, not this picker
+          }
           card.onclick=()=>{
             onSelect(f);
             playSfx('popSound');
@@ -632,41 +624,32 @@
         });
       }).catch(e=>{
         body.innerHTML='<div style="padding:16px;color:#f55;">Fehler beim Laden.</div>';
-        console.error('Picker fetch error:', e);
+        console.error(e);
       });
     }
     function closePicker(){ document.getElementById('pickerOverlay').style.display='none'; }
 
+    // Badge counts
     function updateBadgeCounts(){
-      document.getElementById('count-starmarks').textContent = document.querySelectorAll('.slot[data-category="Starmarks"].filled').length;
-      document.getElementById('count-artifacts').textContent = document.querySelectorAll('.slot[data-category="Artifacts"].filled').length;
-      document.getElementById('count-moon').textContent = document.querySelectorAll('.slot[data-category="MoonBadges"].filled').length;
+      document.getElementById('count-starmarks').textContent=document.querySelectorAll('.slot[data-category="Starmarks"].filled').length;
+      document.getElementById('count-artifacts').textContent=document.querySelectorAll('.slot[data-category="Artifacts"].filled').length;
+      document.getElementById('count-moon').textContent=document.querySelectorAll('.slot[data-category="MoonBadges"].filled').length;
     }
 
+    // Set character
     function setCharacter(f){
-      selectedCharacter = f;
-      document.getElementById('charName').textContent = f.name.replace(/\.[^/.]+$/, '');
-      const hero = document.getElementById('heroDisplay');
-      hero.innerHTML='';
+      selectedCharacter=f;
+      document.getElementById('charName').textContent=f.name.replace(/\.[^/.]+$/,'');
+      const hero=document.getElementById('heroDisplay'); hero.innerHTML='';
       const img=document.createElement('img');
-      img.src=f.download_url;
-      img.alt=f.name;
-      img.loading='lazy';
+      img.src=f.download_url; img.alt=f.name; img.loading='lazy';
       hero.appendChild(img);
     }
 
-    // Slot Handler allgemein
+    // Slot click
     function handleSlotClick(s){
-      openPicker('Icon wählen', async ()=>{
-        try {
-          return await fetchFolder(categoryFolderMap[s.dataset.category]);
-        } catch(e){
-          console.error(`Fehler beim Laden von Icons für "${s.dataset.category}":`, e);
-          throw new Error('Icons konnten nicht geladen werden.');
-        }
-      }, f=>{
-        s.classList.remove('empty');
-        s.classList.add('filled');
+      openPicker('Icon wählen', ()=> fetchFolder(categoryFolderMap[s.dataset.category]), f=>{
+        s.classList.replace('empty','filled');
         s.style.backgroundImage = `url(${f.download_url})`;
         s.dataset.url = f.download_url;
         updateBadgeCounts();
@@ -674,20 +657,11 @@
         playSfx('clickSound');
       });
     }
-    document.querySelectorAll('.slot').forEach(s=>{
-      s.addEventListener('click', ()=> handleSlotClick(s));
-    });
+    document.querySelectorAll('.slot').forEach(s=>s.addEventListener('click', ()=> handleSlotClick(s)));
 
-    // Charakter wählen
+    // Choose character
     document.getElementById('chooseCharacter').addEventListener('click', ()=>{
-      openPicker('Charakter wählen', async ()=>{
-        try {
-          return await fetchFolder('Characters');
-        } catch(e){
-          console.error('Fehler beim Laden der Charaktere:', e);
-          throw new Error('Charaktere konnten nicht geladen werden.');
-        }
-      }, f=>{
+      openPicker('Charakter wählen', ()=> fetchFolder('Characters'), f=>{
         setCharacter(f);
         showToast('Charakter gesetzt');
       });
@@ -699,132 +673,146 @@
       showToast('Charakter entfernt');
     });
 
-    // Builds laden / suchen
-    async function loadBuilds(filter=''){
-      const list = document.getElementById('buildList');
-      list.innerHTML = '<div style="padding:8px;opacity:.7;">Lade Builds…</div>';
-      let builds = null;
-      for (let attempt=1; attempt<=3; attempt++){
-        try {
-          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-          if (!r.ok){
-            const text=await r.text();
-            throw new Error(`HTTP ${r.status}: ${text.slice(0,200)}`);
-          }
-          builds = await r.json();
-          break;
-        } catch(err){
-          console.warn(`loadBuilds Versuch ${attempt} fehlgeschlagen:`, err);
-          if (attempt===3){
-            list.innerHTML = `<div style="padding:8px;color:#f55;">Fehler beim Laden der Builds: ${err.message}</div>`;
-            return;
-          }
-          await new Promise(r=>setTimeout(r, 300 * attempt));
-        }
-      }
-      list.innerHTML='';
-      const entries = Object.entries(builds || {});
-      let found=false;
-      entries.forEach(([name,data])=>{
-        if (filter && !name.toLowerCase().includes(filter.toLowerCase())) return;
-        found=true;
-        const item=document.createElement('div');
-        item.className='build-item';
-        item.innerHTML = `<div><strong>${name}</strong></div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            ${data.character?`<div style="width:24px;height:24px;border-radius:50%;overflow:hidden;border:1px solid var(--neon1);"><img src="${data.character}" style="width:100%;height:100%;object-fit:contain;"></div>`:''}
-            ${Object.values(data.slots||{}).filter(u=>u).slice(0,4).map(u=>`<div style="width:14px;height:14px;border-radius:3px;background-size:cover;background-position:center;background-image:url('${u}')"></div>`).join('')}
-          </div>`;
-        item.addEventListener('click', async ()=>{
-          const overlay=document.getElementById('buildLoadingOverlay');
-          document.getElementById('buildLoadingText').textContent=`Lade Build "${name}"…`;
-          overlay.style.display='flex';
-          try {
-            await new Promise(r=>setTimeout(r, 150));
-            document.querySelectorAll('.slot').forEach(s=>{
-              const url = data.slots?.[s.dataset.slot]||'';
-              if (url){
-                s.style.backgroundImage=`url(${url})`;
-                s.classList.add('filled');
-                s.dataset.url=url;
-                s.classList.remove('empty');
-              } else {
-                s.style.backgroundImage='';
-                s.classList.remove('filled');
-                delete s.dataset.url;
-                s.classList.add('empty');
-              }
-            });
-            if (data.character){
-              setCharacter({download_url:data.character,name:'geladen'});
-            }
-            updateBadgeCounts();
-            showToast(`Build "${name}" geladen`);
-          } finally {
-            overlay.style.display='none';
-          }
-        });
-        list.appendChild(item);
-      });
-      if (!found){
-        list.innerHTML='<div style="padding:8px;opacity:.7;">Keine Builds gefunden.</div>';
-      }
-    }
-
-    document.getElementById('searchBtn').addEventListener('click', ()=> loadBuilds(document.getElementById('searchInput').value));
-    document.getElementById('searchInput').addEventListener('keyup', e=>{
-      if (e.key==='Enter') loadBuilds(e.target.value);
-    });
-
-    document.getElementById('saveBuildBtn').addEventListener('click', async ()=>{
-      const name = prompt('Name für Build:');
-      if (!name) return;
-      showToast(`Speichere "${name}"…`);
-      const slots={};
-      document.querySelectorAll('.slot').forEach(s=>{
-        slots[s.dataset.slot] = s.dataset.url || '';
-      });
-      const character = selectedCharacter ? selectedCharacter.download_url : '';
-      try {
-        const res = await fetch('/.netlify/functions/saveBuilds',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({name, slots, character})
-        });
-        if (!res.ok) throw new Error('Speichern fehlgeschlagen');
-        showToast('✅ Gespeichert');
-        loadBuilds();
-      } catch(e){
-        console.error(e);
-        showToast('Fehler beim Speichern');
-      }
-    });
-
-    document.getElementById('copyLinkBtn').addEventListener('click', ()=>{
-      const params=new URLSearchParams();
-      document.querySelectorAll('.slot').forEach(s=>{
-        if (s.dataset.url) params.set(s.dataset.slot,s.dataset.url);
-      });
-      if (selectedCharacter) params.set('character', selectedCharacter.download_url);
-      navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`);
-      showToast('Link kopiert');
-    });
-
+    // Reset all
     document.getElementById('resetAllBtn').addEventListener('click', ()=>{
       document.querySelectorAll('.slot').forEach(s=>{
-        s.style.backgroundImage='';
-        s.classList.remove('filled');
+        s.classList.replace('filled','empty');
+        s.removeAttribute('style');
         delete s.dataset.url;
-        s.classList.add('empty');
       });
       selectedCharacter=null;
       document.getElementById('charName').textContent='(wählen)';
       document.getElementById('heroDisplay').innerHTML='<div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>';
       updateBadgeCounts();
-      showToast('Zurückgesetzt');
+      showToast('Alles zurückgesetzt');
     });
 
-    // Dev panel logic
+    // Load & render builds in overlay
+    async function loadBuilds(filter='', target){
+      let builds={};
+      try{
+        const res=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+        builds=await res.json();
+      }catch(e){ console.error(e); }
+      target.innerHTML='';
+      const entries=Object.entries(builds);
+      let found=false;
+      entries.forEach(([name,data])=>{
+        if(filter && !name.toLowerCase().includes(filter.toLowerCase())) return;
+        found=true;
+        const card=document.createElement('div');
+        card.className='picker-card';
+        // thumbnail
+        const thumb=data.character||Object.values(data.slots||{}).find(u=>u)||'';
+        if(thumb){
+          const img=document.createElement('img');
+          img.src=thumb; img.alt=name;
+          card.appendChild(img);
+        }
+        const nameDiv=document.createElement('div');
+        nameDiv.className='build-name';
+        nameDiv.textContent=name;
+        card.appendChild(nameDiv);
+        const prevRow=document.createElement('div');
+        prevRow.className='slot-previews';
+        Object.values(data.slots||{}).filter(u=>u).slice(0,4).forEach(u=>{
+          const si=document.createElement('img');
+          si.src=u; prevRow.appendChild(si);
+        });
+        card.appendChild(prevRow);
+        card.onclick=()=>{
+          applyBuild(data,name);
+          closePicker();
+        };
+        target.appendChild(card);
+      });
+      if(!found){
+        target.innerHTML='<div style="padding:16px;color:#f55;">Keine Builds gefunden.</div>';
+      }
+    }
+
+    // Apply build
+    function applyBuild(data,name){
+      const overlay=document.getElementById('buildLoadingOverlay');
+      document.getElementById('buildLoadingText').textContent=`Lade Build "${name}"…`;
+      overlay.style.display='flex';
+      setTimeout(()=>{
+        document.querySelectorAll('.slot').forEach(s=>{
+          const url=data.slots?.[s.dataset.slot]||'';
+          if(url){
+            s.classList.replace('empty','filled');
+            s.style.backgroundImage=`url(${url})`;
+            s.dataset.url=url;
+          } else {
+            s.classList.replace('filled','empty');
+            s.removeAttribute('style');
+            delete s.dataset.url;
+          }
+        });
+        if(data.character){
+          setCharacter({download_url:data.character,name:'geladen'});
+        }
+        updateBadgeCounts();
+        showToast(`Build "${name}" geladen`);
+        overlay.style.display='none';
+      },150);
+    }
+
+    // Show all Builds
+    document.getElementById('showAllBtn').addEventListener('click', ()=>{
+      document.getElementById('pickerTitle').textContent='Alle Builds';
+      const body=document.getElementById('pickerBody');
+      body.innerHTML='<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Lade…</div></div>';
+      document.getElementById('pickerOverlay').style.display='flex';
+      loadBuilds('', body);
+    });
+
+    // Search builds
+    document.getElementById('searchBtn').addEventListener('click', ()=>{
+      const q=document.getElementById('searchInput').value;
+      document.getElementById('pickerTitle').textContent=`Suche: "${q}"`;
+      const body=document.getElementById('pickerBody');
+      body.innerHTML='<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Suchen…</div></div>';
+      document.getElementById('pickerOverlay').style.display='flex';
+      loadBuilds(q, body);
+    });
+    document.getElementById('searchInput').addEventListener('keyup', e=>{
+      if(e.key==='Enter') document.getElementById('searchBtn').click();
+    });
+
+    // Save build
+    document.getElementById('saveBuildBtn').addEventListener('click', async ()=>{
+      const name=prompt('Name für Build:');
+      if(!name) return;
+      showToast(`Speichere "${name}"…`);
+      const slots={};
+      document.querySelectorAll('.slot').forEach(s=>slots[s.dataset.slot]=s.dataset.url||'');
+      const character=selectedCharacter?selectedCharacter.download_url:'';
+      try{
+        const res=await fetch('/.netlify/functions/saveBuilds',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({name,slots,character})
+        });
+        if(!res.ok) throw new Error('Speichern fehlgeschlagen');
+        showToast('✅ Gespeichert');
+      }catch(e){
+        console.error(e); showToast('Fehler beim Speichern');
+      }
+    });
+
+    // Copy link
+    document.getElementById('copyLinkBtn').addEventListener('click', ()=>{
+      const params=new URLSearchParams();
+      document.querySelectorAll('.slot').forEach(s=>{
+        if(s.dataset.url) params.set(s.dataset.slot,s.dataset.url);
+      });
+      if(selectedCharacter) params.set('character',selectedCharacter.download_url);
+      navigator.clipboard.writeText(`${location.origin+location.pathname}?${params}`);
+      showToast('Link kopiert');
+    });
+
+    // Dev panel
     (function(){
       const PASSWORD='devpass';
       const toggle=document.getElementById('devToggle');
@@ -838,27 +826,18 @@
 
       async function loadDevBuilds(){
         buildsListEl.innerHTML='<div class="small">Lade…</div>';
-        try {
-          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-          if(!r.ok) throw new Error();
+        try{
+          const r=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
           const builds=await r.json();
           buildsListEl.innerHTML='';
           Object.keys(builds).forEach(n=>{
             const row=document.createElement('div');
-            row.style.display='flex';
-            row.style.alignItems='center';
-            row.style.gap='8px';
-            row.style.marginBottom='4px';
-            const cb=document.createElement('input');
-            cb.type='checkbox';
-            cb.value=n;
-            const span=document.createElement('span');
-            span.textContent=n;
-            row.appendChild(cb);
-            row.appendChild(span);
-            buildsListEl.appendChild(row);
+            row.style.display='flex'; row.style.alignItems='center'; row.style.gap='8px'; row.style.marginBottom='4px';
+            const cb=document.createElement('input'); cb.type='checkbox'; cb.value=n;
+            const span=document.createElement('span'); span.textContent=n;
+            row.appendChild(cb); row.appendChild(span); buildsListEl.appendChild(row);
           });
-        } catch(e){
+        }catch(e){
           buildsListEl.innerHTML='<div style="color:#f55;">Fehler</div>';
         }
       }
@@ -870,47 +849,41 @@
         loadDevBuilds();
       });
       closeBtn.addEventListener('click', ()=> panel.style.display='none');
-      refreshBtn?.addEventListener('click', ()=> loadDevBuilds());
+      refreshBtn?.addEventListener('click', loadDevBuilds);
       deleteBtn.addEventListener('click', async ()=>{
         status.textContent='';
-        const checked = Array.from(buildsListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.value);
-        const manual = manualInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-        const toDelete = Array.from(new Set([...checked,...manual]));
+        const checked=Array.from(buildsListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.value);
+        const manual=manualInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+        const toDelete=Array.from(new Set([...checked,...manual]));
         if(!toDelete.length){ status.textContent='Keine Builds.'; return; }
         if(!confirm(`Lösche: ${toDelete.join(', ')}`)) return;
         status.textContent='Lösche…';
-        try {
-          const res = await fetch('/.netlify/functions/deleteBuilds',{
+        try{
+          const res=await fetch('/.netlify/functions/deleteBuilds',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({names:toDelete})
+            body:JSON.stringify({names:toDelete})
           });
-          const text=await res.text();
-          let data;
-          try{ data=JSON.parse(text); } catch { data={raw:text}; }
-          if(!res.ok){
-            status.textContent=`Fehler: ${data.message||data.raw}`;
-          } else {
-            status.textContent=`Gelöscht: ${(data.removed||toDelete).join(', ')}`;
-          }
+          const text=await res.text(); let data;
+          try{ data=JSON.parse(text);}catch{data={raw:text};}
+          if(!res.ok) status.textContent=`Fehler: ${data.message||data.raw}`;
+          else status.textContent=`Gelöscht: ${(data.removed||toDelete).join(', ')}`;
           await loadDevBuilds();
-        } catch(e){
-          console.error(e);
-          status.textContent='Netzwerkfehler.';
+        }catch(e){
+          console.error(e); status.textContent='Netzwerkfehler.';
         }
       });
     })();
 
-    // init
+    // Init
     window.addEventListener('load', ()=>{
-      loadBuilds();
       updateBadgeCounts();
       const params=new URLSearchParams(location.search);
       document.querySelectorAll('.slot').forEach(s=>{
         const url=params.get(s.dataset.slot);
         if(url){
+          s.classList.replace('empty','filled');
           s.style.backgroundImage=`url(${url})`;
-          s.classList.add('filled');
           s.dataset.url=url;
         }
       });
@@ -918,11 +891,9 @@
         setCharacter({download_url:params.get('character'),name:'URL'});
       }
     });
-
-    // global click sound
+    // Global click sound
     document.body.addEventListener('click', e=>{
-      const target = e.target.closest('button,.slot');
-      if (target) playSfx('clickSound');
+      if(e.target.closest('button,.slot')) playSfx('clickSound');
     });
   </script>
 </body>
