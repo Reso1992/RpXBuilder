@@ -70,5 +70,21 @@
       "armor4": ""
     },
     "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10043-Chika-L.webp"
+  },
+  "Tested81": {
+    "slots": {
+      "sq1": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/14.png",
+      "sq3": "",
+      "sq5": "",
+      "sq6": "",
+      "ct": "",
+      "sq2": "",
+      "sq4": "",
+      "armor1": "",
+      "armor2": "",
+      "armor3": "",
+      "armor4": ""
+    },
+    "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10043-Chika-L.webp"
   }
 }
