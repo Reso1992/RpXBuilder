@@ -1,439 +1,473 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<title>RpX Neon Builder - Charakter oben mit Rüstung</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  :root {
-    --bg:#0f0f25;
-    --panel:#1f2145;
-    --radius:10px;
-    --neon1:#00ffe7;
-    --neon2:#ff5ec7;
-    --text:#e3effb;
-    --transition:.25s cubic-bezier(.3,.1,.25,1);
-    --border:1px solid rgba(255,255,255,0.08);
-    --shadow:0 30px 90px -10px rgba(165,108,255,0.3);
-  }
-  *{box-sizing:border-box;}
-  body {
-    margin:0;
-    background: linear-gradient(135deg,#0f0f25 0%,#1a1a45 80%);
-    font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
-    color: var(--text);
-    min-height:100vh;
-  }
-  body::before {
-    content:'';
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 60%);
-    mix-blend-mode:overlay;
-  }
-  .top-character {
-    max-width:1400px;
-    margin:0 auto;
-    padding:16px 20px 4px;
-  }
-  .container {
-    max-width:1400px;
-    margin:0 auto;
-    padding:4px 20px 60px;
-    display:grid;
-    grid-template-columns:280px 1fr;
-    gap:20px;
-  }
+  <meta charset="UTF-8" />
+  <title>RpX Neon Builder - Charakter oben mit Rüstung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f0f25;
+      --panel: #1f2145;
+      --radius: 10px;
+      --neon1: #00ffe7;
+      --neon2: #ff5ec7;
+      --text: #e3effb;
+      --transition: .25s cubic-bezier(.3,.1,.25,1);
+      --border: 1px solid rgba(255,255,255,0.08);
+      --shadow: 0 30px 90px -10px rgba(165,108,255,0.3);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f0f25 0%, #1a1a45 80%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 60%);
+      mix-blend-mode: overlay;
+    }
 
-  .character-panel {
-    background: var(--panel);
-    border-radius:12px;
-    padding:18px 22px;
-    display:flex;
-    gap:24px;
-    position:relative;
-    border: var(--border);
-    box-shadow: var(--shadow);
-    flex-wrap:wrap;
-    margin-bottom:16px;
-  }
-  .hero-preview {
-    position:relative;
-    width:220px;
-    height:220px;
-    border-radius:50%;
-    background: linear-gradient(135deg,var(--neon2),var(--neon1));
-    padding:6px;
-    flex:0 0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .hero-inner {
-    background:#1b1f57;
-    border-radius:50%;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-  }
-  .hero-inner img {
-    width:100%;
-    height:100%;
-    object-fit:contain;
-  }
-  .hero-info {
-    flex:1;
-    min-width:220px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-  .hero-info h2 {
-    margin:0;
-    font-size:1.5rem;
-    letter-spacing:1px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
-  .badge-row {
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-top:6px;
-  }
-  .badge {
-    background: rgba(255,255,255,0.05);
-    padding:6px 14px;
-    border-radius:8px;
-    font-size:12px;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    border:1px solid rgba(255,255,255,0.12);
-    pointer-events: none;
-  }
+    .top-character {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px 20px 4px;
+    }
 
-  .sidebar {
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-  }
-  .group {
-    background: var(--panel);
-    padding:14px 16px;
-    border-radius:10px;
-    border: var(--border);
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    box-shadow: var(--shadow);
-  }
-  .group h4 {
-    margin:0;
-    font-size:0.85rem;
-    text-transform:uppercase;
-    letter-spacing:1px;
-  }
-  .slot-grid {
-    display:grid;
-    gap:10px;
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .slot {
-    position:relative;
-    background: rgba(255,255,255,0.02);
-    border-radius:8px;
-    min-height:100px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    border:2px solid rgba(255,255,255,0.08);
-    transition: all var(--transition);
-  }
-  .slot.empty::after {
-    content:'+';
-    position:absolute;
-    font-size:28px;
-    color:rgba(255,255,255,0.35);
-    pointer-events:none;
-  }
-  .slot.filled {
-    box-shadow:0 0 22px var(--neon1),0 0 44px var(--neon2);
-    border-color: var(--neon1);
-    background-size:contain;
-    background-position:center;
-    background-repeat:no-repeat;
-  }
-  .slot img {
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    pointer-events:none;
-    display:block;
-  }
+    .character-panel {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;  /* horizontal zentrieren */
+      align-items: center;      /* vertikal zentrieren */
+      position: relative;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
 
-  .side {
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-  }
-  .card {
-    background: var(--panel);
-    padding:16px 18px;
-    border-radius:10px;
-    border: var(--border);
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    box-shadow: var(--shadow);
-  }
-  .card h3 {
-    margin:0;
-    font-size:1rem;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-  .actions {
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  .btn {
-    padding:12px 16px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    letter-spacing:1px;
-    position:relative;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    background: linear-gradient(135deg,var(--neon1),var(--neon2));
-    color:#000;
-    transition:filter var(--transition), transform .15s;
-    box-shadow: 0 0 30px rgba(0,255,231,0.6);
-  }
-  .btn.secondary {
-    background:transparent;
-    border:2px solid var(--neon1);
-    color: var(--neon1);
-    box-shadow: 0 0 18px rgba(0,255,231,0.35);
-  }
-  .btn:hover { filter:brightness(1.1); }
-  .btn:active { transform:scale(.95); }
+    /* Container jetzt zweizeilig */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4px 20px 60px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
 
-  /* Builds & Suche */
-  .builds-search {
-    display:flex;
-    gap:8px;
-    align-items:center;
-  }
+    .hero-preview {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon2), var(--neon1));
+      padding: 6px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-inner {
+      background: #1b1f57;
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .hero-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .hero-info {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;      /* Inhalt mittig */
+    }
+    .hero-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;  /* Buttons mittig */
+    }
+    .badge-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;  /* Badges mittig */
+      flex-wrap: nowrap;        /* in einer Zeile */
+      margin-top: 6px;
+    }
+    .badge {
+      flex: 1;                  /* gleiche Breite */
+      min-width: 80px;          /* verhindert zu enge Boxes */
+      background: rgba(255,255,255,0.05);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center; /* Text mittig */
+      text-align: center;
+      gap: 6px;
+      border: 1px solid rgba(255,255,255,0.12);
+      pointer-events: none;
+    }
 
-  /* Picker-Card mit Name & Slot-Previews */
-  .picker-card {
-    background: rgba(255,255,255,0.02);
-    border-radius:8px;
-    padding:8px;
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:6px;
-    position:relative;
-    transition:transform var(--transition), box-shadow .25s ease;
-    border:1px solid rgba(255,255,255,0.08);
-    min-width:120px;
-  }
-  .picker-card:hover {
-    transform:translateY(-2px);
-    box-shadow:0 0 24px var(--neon1);
-  }
-  .picker-card img {
-    max-width:80px;
-    max-height:80px;
-    object-fit:contain;
-    border-radius:4px;
-    display:block;
-  }
-  .picker-card .build-name {
-    font-size:0.85rem;
-    text-align:center;
-    word-break:break-word;
-    max-width:100px;
-  }
-  .picker-card .slot-previews {
-    display:flex;
-    gap:4px;
-    flex-wrap:wrap;
-    justify-content:center;
-  }
-  .picker-card .slot-previews img {
-    width:16px;
-    height:16px;
-    object-fit:cover;
-    border-radius:3px;
-    border:1px solid rgba(255,255,255,0.12);
-  }
+    /* Sidebar oben links */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .group {
+      background: var(--panel);
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow);
+    }
+    .group h4 {
+      margin: 0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .slot-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .slot {
+      position: relative;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      min-height: 100px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.08);
+      transition: all var(--transition);
+    }
+    .slot.empty::after {
+      content: '+';
+      position: absolute;
+      font-size: 28px;
+      color: rgba(255,255,255,0.35);
+      pointer-events: none;
+    }
+    .slot.filled {
+      box-shadow: 0 0 22px var(--neon1), 0 0 44px var(--neon2);
+      border-color: var(--neon1);
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
 
-  .overlay {
-    position:fixed;
-    inset:0;
-    background:rgba(15,16,48,0.95);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-    z-index:1000;
-  }
-  .picker {
-    background: #1f2145;
-    width:100%;
-    max-width:900px;
-    border-radius:14px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    border: var(--border);
-    box-shadow: 0 0 120px rgba(165,108,255,0.3);
-  }
-  .picker-header {
-    display:flex;
-    gap:10px;
-    align-items:center;
-    padding:14px 16px;
-    border-bottom:1px solid rgba(255,255,255,0.08);
-  }
-  .picker-header .title {
-    flex:1;
-    margin:0;
-    font-size:1.2rem;
-    font-weight:700;
-  }
-  .close-btn {
-    background:transparent;
-   	border:none;
-    font-size:1.2rem;
-    color:#fff;
-    cursor:pointer;
-    padding:6px;
-    border-radius:6px;
-    transition:background var(--transition);
-  }
-  .close-btn:hover { background:rgba(255,255,255,0.08); }
-  .picker-body {
-    padding:14px;
-    display:grid;
-    gap:12px;
-    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-    max-height:65vh;
-    overflow:auto;
-  }
-  .loading {
-    display:flex;
-    gap:12px;
-    align-items:center;
-    justify-content:center;
-    font-size:14px;
-    padding:30px 0;
-  }
+    /* Aktionen & Suche nun unten, über beide Spalten */
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .card {
+      background: var(--panel);
+      padding: 16px 18px;
+      border-radius: 10px;
+      border: var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 1px;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--neon1), var(--neon2));
+      color: #000;
+      transition: filter var(--transition), transform .15s;
+      box-shadow: 0 0 30px rgba(0,255,231,0.6);
+    }
+    .btn.secondary {
+      background: transparent;
+      border: 2px solid var(--neon1);
+      color: var(--neon1);
+      box-shadow: 0 0 18px rgba(0,255,231,0.35);
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:active { transform: scale(.95); }
 
-  #toast {
-    position:fixed;
-    top:14px;
-    left:50%;
-    transform:translateX(-50%);
-    background: rgba(20,20,80,0.95);
-    padding:14px 18px;
-    border-radius:8px;
-    font-size:13px;
-    display:flex;
-    gap:10px;
-    z-index:1500;
-    color:#fff;
-    box-shadow:0 0 60px rgba(165,108,255,0.5);
-  }
+    .builds-search {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
 
-  #devToggle {
-    position:fixed;
-    top:14px;
-    right:14px;
-    background: transparent;
-    border:2px solid var(--neon2);
-    padding:10px 16px;
-    border-radius:8px;
-    cursor:pointer;
-    color: var(--text);
-    font-weight:600;
-    z-index:2000;
-    backdrop-filter:blur(6px);
-  }
-  #devPanel {
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background: rgba(31,33,75,0.95);
-    border-radius:12px;
-    padding:18px 22px;
-    width:420px;
-    max-width:95vw;
-    display:none;
-    flex-direction:column;
-    gap:12px;
-    border: var(--border);
-    box-shadow:0 0 100px rgba(165,108,255,0.6);
-    z-index:2000;
-  }
-  #devPanel h4 { margin:0; font-size:1rem; letter-spacing:1px; }
-  .dev-row { display:flex; gap:8px; flex-wrap:wrap; }
-  .dev-input { flex:1; padding:8px; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; }
-  .builds-checkboxes { max-height:160px; overflow:auto; background: rgba(255,255,255,0.02); padding:8px; border-radius:6px; }
-  .small { font-size:12px; opacity:.8; }
+    .picker-card {
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      transition: transform var(--transition), box-shadow .25s ease;
+      border: 1px solid rgba(255,255,255,0.08);
+      min-width: 120px;
+    }
+    .picker-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px var(--neon1);
+    }
+    .picker-card img {
+      max-width: 80px;
+      max-height: 80px;
+      object-fit: contain;
+      border-radius: 4px;
+      display: block;
+    }
+    .picker-card .build-name {
+      font-size: 0.85rem;
+      text-align: center;
+      word-break: break-word;
+      max-width: 100px;
+    }
+    .picker-card .slot-previews {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .picker-card .slot-previews img {
+      width: 16px;
+      height: 16px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
 
-  .build-loading-overlay {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:1800;
-    color:#fff;
-    font-size:16px;
-    flex-direction:column;
-    gap:12px;
-  }
-  .build-loading-overlay .spinner {
-    width:40px;
-    height:40px;
-    border:5px solid rgba(255,255,255,0.2);
-    border-top-color: var(--neon1);
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
-  @media (max-width:1250px){
-    .container { grid-template-columns:1fr; }
-    .sidebar, .side { order:2; }
-  }
-  @media (max-width:950px){
-    .character-panel { flex-direction:column; align-items:center; }
-    .container { grid-template-columns:1fr; }
-  }
-</style>
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,16,48,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 1000;
+    }
+    .picker {
+      background: #1f2145;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: var(--border);
+      box-shadow: 0 0 120px rgba(165,108,255,0.3);
+    }
+    .picker-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .picker-header .title {
+      flex: 1;
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      color: #fff;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background var(--transition);
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.08); }
+    .picker-body {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      max-height: 65vh;
+      overflow: auto;
+    }
+    .loading {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      padding: 30px 0;
+    }
+
+    #toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20,20,80,0.95);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      z-index: 1500;
+      color: #fff;
+      box-shadow: 0 0 60px rgba(165,108,255,0.5);
+    }
+
+    #devToggle {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      background: transparent;
+      border: 2px solid var(--neon2);
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 600;
+      z-index: 2000;
+      backdrop-filter: blur(6px);
+    }
+    #devPanel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      background: rgba(31,33,75,0.95);
+      border-radius: 12px;
+      padding: 18px 22px;
+      width: 420px;
+      max-width: 95vw;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      border: var(--border);
+      box-shadow: 0 0 100px rgba(165,108,255,0.6);
+    }
+    #devPanel h4 { margin: 0; font-size: 1rem; letter-spacing: 1px; }
+    .dev-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .dev-input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .builds-checkboxes {
+      max-height: 160px;
+      overflow: auto;
+      background: rgba(255,255,255,0.02);
+      padding: 8px;
+      border-radius: 6px;
+    }
+    .small { font-size: 12px; opacity: .8; }
+
+    .build-loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1800;
+      color: #fff;
+      font-size: 16px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .build-loading-overlay .spinner {
+      width: 40px;
+      height: 40px;
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top-color: var(--neon1);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Neu: Builder-Ansicht im Overlay */
+    .picker-body.builder-view {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
 </head>
 <body>
 
@@ -497,7 +531,7 @@
       </div>
     </div>
 
-    <!-- Aktionen & Suche rechts -->
+    <!-- Aktionen & Suche unten -->
     <div class="side">
       <div class="card">
         <h3>Aktionen</h3>
@@ -565,7 +599,7 @@
 
   <!-- Sounds -->
   <audio id="clickSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
-  <audio id="popSound" src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
+  <audio id="popSound" src="data:audio/ogg;base64=T2dnUwACAAAAAAAAAABVDGdIAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
 
   <script>
     const REPO = 'Reso1992/RpXBuilder';
@@ -603,6 +637,7 @@
     function openPicker(title, fetcher, onSelect){
       document.getElementById('pickerTitle').textContent=title;
       const body = document.getElementById('pickerBody');
+      body.classList.remove('builder-view');
       body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Lade…</div></div>';
       document.getElementById('pickerOverlay').style.display='flex';
       fetcher().then(files=>{
@@ -668,7 +703,6 @@
     });
     // Single "Zurücksetzen" at top clears everything
     document.getElementById('clearCharacter').addEventListener('click', ()=>{
-      // reset all slots + character
       document.querySelectorAll('.slot').forEach(s=>{
         s.classList.replace('filled','empty');
         s.removeAttribute('style');
@@ -679,98 +713,6 @@
       document.getElementById('heroDisplay').innerHTML='<div id="noCharText" style="opacity:.6;font-size:14px;">Keine</div>';
       updateBadgeCounts();
       showToast('Alles zurückgesetzt');
-    });
-
-    // Load & render builds in overlay
-    async function loadBuilds(filter='', target){
-      let builds={};
-      try{
-        const res=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-        builds=await res.json();
-      }catch(e){ console.error(e); }
-      target.innerHTML='';
-      const entries=Object.entries(builds);
-      let found=false;
-      entries.forEach(([name,data])=>{
-        if(filter && !name.toLowerCase().includes(filter.toLowerCase())) return;
-        found=true;
-        const card=document.createElement('div');
-        card.className='picker-card';
-        const thumb=data.character||Object.values(data.slots||{}).find(u=>u)||'';
-        if(thumb){
-          const img=document.createElement('img');
-          img.src=thumb; img.alt=name;
-          card.appendChild(img);
-        }
-        const nameDiv=document.createElement('div');
-        nameDiv.className='build-name';
-        nameDiv.textContent=name;
-        card.appendChild(nameDiv);
-        const prevRow=document.createElement('div');
-        prevRow.className='slot-previews';
-        Object.values(data.slots||{}).filter(u=>u).slice(0,4).forEach(u=>{
-          const si=document.createElement('img');
-          si.src=u; prevRow.appendChild(si);
-        });
-        card.appendChild(prevRow);
-        card.onclick=()=>{
-          applyBuild(data,name);
-          closePicker();
-        };
-        target.appendChild(card);
-      });
-      if(!found){
-        target.innerHTML='<div style="padding:16px;color:#f55;">Keine Builds gefunden.</div>';
-      }
-    }
-
-    // Apply build
-    function applyBuild(data,name){
-      const overlay=document.getElementById('buildLoadingOverlay');
-      document.getElementById('buildLoadingText').textContent=`Lade Build "${name}"…`;
-      overlay.style.display='flex';
-      setTimeout(()=>{
-        document.querySelectorAll('.slot').forEach(s=>{
-          const url=data.slots?.[s.dataset.slot]||'';
-          if(url){
-            s.classList.replace('empty','filled');
-            s.style.backgroundImage=`url(${url})`;
-            s.dataset.url=url;
-          } else {
-            s.classList.replace('filled','empty');
-            s.removeAttribute('style');
-            delete s.dataset.url;
-          }
-        });
-        if(data.character){
-          setCharacter({download_url:data.character,name:'geladen'});
-        }
-        updateBadgeCounts();
-        showToast(`Build "${name}" geladen`);
-        overlay.style.display='none';
-      },150);
-    }
-
-    // Show all Builds
-    document.getElementById('showAllBtn').addEventListener('click', ()=>{
-      document.getElementById('pickerTitle').textContent='Alle Builds';
-      const body=document.getElementById('pickerBody');
-      body.innerHTML='<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Lade…</div></div>';
-      document.getElementById('pickerOverlay').style.display='flex';
-      loadBuilds('', body);
-    });
-
-    // Search builds
-    document.getElementById('searchBtn').addEventListener('click', ()=>{
-      const q=document.getElementById('searchInput').value;
-      document.getElementById('pickerTitle').textContent=`Suche: "${q}"`;
-      const body=document.getElementById('pickerBody');
-      body.innerHTML='<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Suchen…</div></div>';
-      document.getElementById('pickerOverlay').style.display='flex';
-      loadBuilds(q, body);
-    });
-    document.getElementById('searchInput').addEventListener('keyup', e=>{
-      if(e.key==='Enter') document.getElementById('searchBtn').click();
     });
 
     // Save build
@@ -805,65 +747,291 @@
       showToast('Link kopiert');
     });
 
-    // Dev panel
+    // Load builds.json
+    async function fetchBuilds(){
+      try{
+        const res=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+        return await res.json();
+      }catch(e){
+        console.error(e);
+        return {};
+      }
+    }
+
+    // Show all characters + build-count
+    async function showCharacterList(){
+      document.getElementById('pickerTitle').textContent='Alle Builds nach Charakter';
+      const body = document.getElementById('pickerBody');
+      body.classList.remove('builder-view');
+      body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Lade…</div></div>';
+      document.getElementById('pickerOverlay').style.display='flex';
+
+      const chars = await fetchFolder('Characters');
+      const allBuilds = await fetchBuilds();
+      const counts = {};
+      Object.entries(allBuilds).forEach(([bname,data])=>{
+        const url = data.character||'';
+        counts[url] = (counts[url]||0) + 1;
+      });
+
+      body.innerHTML = '';
+      chars.forEach(f=>{
+        const url = f.download_url;
+        const cname = f.name.replace(/\.[^/.]+$/,'');
+        const count = counts[url]||0;
+        const card = document.createElement('div');
+        card.className = 'picker-card';
+        const img = document.createElement('img');
+        img.src = url; img.alt = cname;
+        card.appendChild(img);
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'build-name';
+        nameDiv.textContent = cname;
+        card.appendChild(nameDiv);
+        const badge = document.createElement('div');
+        badge.className = 'badge';
+        badge.textContent = count;
+        card.appendChild(badge);
+        const buildsForChar = Object.entries(allBuilds)
+          .filter(([bname,data]) => data.character === url)
+          .map(([bname,data]) => ({ name: bname, data }));
+        card.onclick = () => showBuildCarousel(cname, buildsForChar);
+        body.appendChild(card);
+      });
+    }
+
+    // Carousel + Builder-Ansicht für einen Charakter
+    function showBuildCarousel(cname, builds){
+      const title = document.getElementById('pickerTitle');
+      const body = document.getElementById('pickerBody');
+      title.textContent = `${cname} Builds`;
+      body.classList.add('builder-view');
+      body.innerHTML = '';
+      let idx = 0;
+
+      function renderBuilder(){
+        body.innerHTML = '';
+        const heroDiv = document.createElement('div');
+        heroDiv.className = 'hero-preview';
+        const inner = document.createElement('div');
+        inner.className = 'hero-inner';
+        const thumb = builds[idx].data.character;
+        if (thumb){
+          const img = document.createElement('img');
+          img.src = thumb;
+          inner.appendChild(img);
+        }
+        heroDiv.appendChild(inner);
+        body.appendChild(heroDiv);
+
+        const groups = [
+          { label: 'Starmarks', slots: ['sq1','sq3','sq5','sq6'] },
+          { label: 'Artifacts', slots: ['ct'] },
+          { label: 'Moonbadges', slots: ['sq2','sq4'] },
+          { label: 'Rüstung', slots: ['armor1','armor2','armor3','armor4'] }
+        ];
+        groups.forEach(g=>{
+          const grp = document.createElement('div');
+          grp.className = 'group';
+          const h4 = document.createElement('h4');
+          h4.textContent = g.label;
+          grp.appendChild(h4);
+          const grid = document.createElement('div');
+          grid.className = 'slot-grid';
+          g.slots.forEach(slotName=>{
+            const s = document.createElement('div');
+            const url = builds[idx].data.slots?.[slotName]||'';
+            if(url){
+              s.className = 'slot filled';
+              s.style.backgroundImage = `url(${url})`;
+            } else {
+              s.className = 'slot empty';
+            }
+            grid.appendChild(s);
+          });
+          grp.appendChild(grid);
+          body.appendChild(grp);
+        });
+
+        const ctrls = document.createElement('div');
+        ctrls.className = 'build-carousel-controls';
+        Object.assign(ctrls.style,{
+          display:'flex',
+          gap:'8px',
+          justifyContent:'center',
+          marginTop:'12px'
+        });
+        const left = document.createElement('button');
+        left.className = 'btn secondary';
+        left.textContent = '<';
+        left.onclick = ()=>{
+          if(idx>0){ idx--; renderBuilder(); }
+        };
+        const go = document.createElement('button');
+        go.className = 'btn';
+        go.textContent = 'Go to Builder';
+        go.onclick = ()=>{
+          applyBuild(builds[idx].data, builds[idx].name);
+          closePicker();
+        };
+        const right = document.createElement('button');
+        right.className = 'btn secondary';
+        right.textContent = '>';
+        right.onclick = ()=>{
+          if(idx<builds.length-1){ idx++; renderBuilder(); }
+        };
+        ctrls.appendChild(left);
+        ctrls.appendChild(go);
+        ctrls.appendChild(right);
+        body.appendChild(ctrls);
+      }
+
+      if(builds.length === 0){
+        body.innerHTML = '<div style="padding:16px;color:#f55;">Keine Builds für diesen Charakter.</div>';
+      } else {
+        renderBuilder();
+      }
+    }
+
+    // Show all Builds (Charakterliste)
+    document.getElementById('showAllBtn').addEventListener('click', showCharacterList);
+
+    // Search builds
+    document.getElementById('searchBtn').addEventListener('click', ()=>{
+      const q = document.getElementById('searchInput').value;
+      document.getElementById('pickerTitle').textContent = `Suche: "${q}"`;
+      const body = document.getElementById('pickerBody');
+      body.classList.remove('builder-view');
+      body.innerHTML = '<div class="loading"><div class="spinner" style="border:3px solid rgba(255,255,255,0.2);border-top-color:var(--neon1);border-radius:50%;width:18px;height:18px;margin-right:8px;"></div><div>Suchen…</div></div>';
+      document.getElementById('pickerOverlay').style.display = 'flex';
+      loadBuilds(q, body);
+    });
+    document.getElementById('searchInput').addEventListener('keyup', e=>{
+      if(e.key==='Enter') document.getElementById('searchBtn').click();
+    });
+
+    async function loadBuilds(filter='', target){
+      const all = await fetchBuilds();
+      target.innerHTML = '';
+      const entries = Object.entries(all);
+      let found = false;
+      entries.forEach(([name,data])=>{
+        if(filter && !name.toLowerCase().includes(filter.toLowerCase())) return;
+        found = true;
+        const card = document.createElement('div');
+        card.className = 'picker-card';
+        const thumb = data.character || Object.values(data.slots||{}).find(u=>u) || '';
+        if(thumb){
+          const img = document.createElement('img');
+          img.src = thumb; img.alt = name;
+          card.appendChild(img);
+        }
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'build-name';
+        nameDiv.textContent = name;
+        card.appendChild(nameDiv);
+        const prevRow = document.createElement('div');
+        prevRow.className = 'slot-previews';
+        Object.values(data.slots||{}).filter(u=>u).slice(0,4).forEach(u=>{
+          const si = document.createElement('img');
+          si.src = u; prevRow.appendChild(si);
+        });
+        card.appendChild(prevRow);
+        card.onclick = ()=>{
+          applyBuild(data, name);
+          closePicker();
+        };
+        target.appendChild(card);
+      });
+      if(!found){
+        target.innerHTML = '<div style="padding:16px;color:#f55;">Keine Builds gefunden.</div>';
+      }
+    }
+
+    function applyBuild(data,name){
+      const overlay = document.getElementById('buildLoadingOverlay');
+      document.getElementById('buildLoadingText').textContent = `Lade Build "${name}"…`;
+      overlay.style.display = 'flex';
+      setTimeout(()=>{
+        document.querySelectorAll('.slot').forEach(s=>{
+          const url = data.slots?.[s.dataset.slot] || '';
+          if(url){
+            s.classList.replace('empty','filled');
+            s.style.backgroundImage = `url(${url})`;
+            s.dataset.url = url;
+          } else {
+            s.classList.replace('filled','empty');
+            s.removeAttribute('style');
+            delete s.dataset.url;
+          }
+        });
+        if(data.character){
+          setCharacter({ download_url: data.character, name: 'geladen' });
+        }
+        updateBadgeCounts();
+        showToast(`Build "${name}" geladen`);
+        overlay.style.display = 'none';
+      }, 150);
+    }
+
     (function(){
-      const PASSWORD='devpass';
-      const toggle=document.getElementById('devToggle');
-      const panel=document.getElementById('devPanel');
-      const closeBtn=document.getElementById('closeDev');
-      const refreshBtn=document.getElementById('refreshBuildsDev');
-      const buildsListEl=document.getElementById('devBuildsList');
-      const deleteBtn=document.getElementById('deleteSelectedBuilds');
-      const manualInput=document.getElementById('manualDeleteInput');
-      const status=document.getElementById('devStatus');
+      const PASSWORD = 'devpass';
+      const toggle = document.getElementById('devToggle');
+      const panel = document.getElementById('devPanel');
+      const closeBtn = document.getElementById('closeDev');
+      const refreshBtn = document.getElementById('refreshBuildsDev');
+      const buildsListEl = document.getElementById('devBuildsList');
+      const deleteBtn = document.getElementById('deleteSelectedBuilds');
+      const manualInput = document.getElementById('manualDeleteInput');
+      const status = document.getElementById('devStatus');
 
       async function loadDevBuilds(){
-        buildsListEl.innerHTML='<div class="small">Lade…</div>';
+        buildsListEl.innerHTML = '<div class="small">Lade…</div>';
         try{
-          const r=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
-          const builds=await r.json();
-          buildsListEl.innerHTML='';
+          const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/builds.json?cachebust=${Date.now()}`);
+          const builds = await r.json();
+          buildsListEl.innerHTML = '';
           Object.keys(builds).forEach(n=>{
-            const row=document.createElement('div');
-            row.style.display='flex'; row.style.alignItems='center'; row.style.gap='8px'; row.style.marginBottom='4px';
-            const cb=document.createElement('input'); cb.type='checkbox'; cb.value=n;
-            const span=document.createElement('span'); span.textContent=n;
+            const row = document.createElement('div');
+            row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '8px'; row.style.marginBottom = '4px';
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = n;
+            const span = document.createElement('span'); span.textContent = n;
             row.appendChild(cb); row.appendChild(span); buildsListEl.appendChild(row);
           });
         }catch(e){
-          buildsListEl.innerHTML='<div style="color:#f55;">Fehler</div>';
+          buildsListEl.innerHTML = '<div style="color:#f55;">Fehler</div>';
         }
       }
 
       toggle.addEventListener('click', ()=>{
-        const attempt=prompt('Dev Passwort:');
-        if(attempt!==PASSWORD){ alert('Falsch'); return; }
-        panel.style.display='flex';
+        const attempt = prompt('Dev Passwort:');
+        if(attempt !== PASSWORD){ alert('Falsch'); return; }
+        panel.style.display = 'flex';
         loadDevBuilds();
       });
-      closeBtn.addEventListener('click', ()=> panel.style.display='none');
+      closeBtn.addEventListener('click', ()=> panel.style.display = 'none');
       refreshBtn?.addEventListener('click', loadDevBuilds);
       deleteBtn.addEventListener('click', async ()=>{
-        status.textContent='';
-        const checked=Array.from(buildsListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.value);
-        const manual=manualInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-        const toDelete=Array.from(new Set([...checked,...manual]));
-        if(!toDelete.length){ status.textContent='Keine Builds.'; return; }
+        status.textContent = '';
+        const checked = Array.from(buildsListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.value);
+        const manual = manualInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+        const toDelete = Array.from(new Set([...checked, ...manual]));
+        if(!toDelete.length){ status.textContent = 'Keine Builds.'; return; }
         if(!confirm(`Lösche: ${toDelete.join(', ')}`)) return;
-        status.textContent='Lösche…';
+        status.textContent = 'Lösche…';
         try{
-          const res=await fetch('/.netlify/functions/deleteBuilds',{
+          const res = await fetch('/.netlify/functions/deleteBuilds',{
             method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({names:toDelete})
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ names: toDelete })
           });
-          const text=await res.text(); let data;
-          try{ data=JSON.parse(text);}catch{data={raw:text};}
-          if(!res.ok) status.textContent=`Fehler: ${data.message||data.raw}`;
-          else status.textContent=`Gelöscht: ${(data.removed||toDelete).join(', ')}`;
+          const text = await res.text(); let data;
+          try{ data = JSON.parse(text); }catch{ data = { raw: text }; }
+          if(!res.ok) status.textContent = `Fehler: ${data.message||data.raw}`;
+          else status.textContent = `Gelöscht: ${(data.removed||toDelete).join(', ')}`;
           await loadDevBuilds();
         }catch(e){
-          console.error(e); status.textContent='Netzwerkfehler.';
+          console.error(e); status.textContent = 'Netzwerkfehler.';
         }
       });
     })();
@@ -871,19 +1039,20 @@
     // Init
     window.addEventListener('load', ()=>{
       updateBadgeCounts();
-      const params=new URLSearchParams(location.search);
+      const params = new URLSearchParams(location.search);
       document.querySelectorAll('.slot').forEach(s=>{
-        const url=params.get(s.dataset.slot);
+        const url = params.get(s.dataset.slot);
         if(url){
           s.classList.replace('empty','filled');
-          s.style.backgroundImage=`url(${url})`;
-          s.dataset.url=url;
+          s.style.backgroundImage = `url(${url})`;
+          s.dataset.url = url;
         }
       });
       if(params.get('character')){
-        setCharacter({download_url:params.get('character'),name:'URL'});
+        setCharacter({ download_url: params.get('character'), name: 'URL' });
       }
     });
+
     // Global click sound
     document.body.addEventListener('click', e=>{
       if(e.target.closest('button,.slot')) playSfx('clickSound');
