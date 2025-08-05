@@ -86,5 +86,21 @@
       "armor4": ""
     },
     "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10043-Chika-L.webp"
+  },
+  "test": {
+    "slots": {
+      "sq1": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/12.png",
+      "sq3": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/1.png",
+      "sq5": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/10.png",
+      "sq6": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Starmarks/13.png",
+      "ct": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Artifacts/Screenshot%202025-08-04%20004410.png",
+      "sq2": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/1.png",
+      "sq4": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Moonbadges/10.png",
+      "armor1": "",
+      "armor2": "",
+      "armor3": "",
+      "armor4": ""
+    },
+    "character": "https://raw.githubusercontent.com/Reso1992/RpXBuilder/main/Characters/10401.webp"
   }
 }
